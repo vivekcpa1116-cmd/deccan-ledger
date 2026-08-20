@@ -219,6 +219,47 @@
   .icon-btn:disabled{opacity:.3; pointer-events:none;}
   @media (max-width:600px){ .icon-btn.fs{width:34px; font-size:13px;} }
 
+
+  /* ==== MOBILE NAV: SECTION + READER SHEETS ==== */
+  .mobilebar{display:none;}
+  @media (max-width:700px){
+    .appbar-row{display:none;}
+    .mobilebar{display:flex; align-items:center; justify-content:space-between; gap:10px; max-width:740px; margin:0 auto; padding:2px 0;}
+    .mb-section{font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink); background:none; border:none; padding:8px 4px; cursor:pointer; display:flex; align-items:center; gap:7px; min-width:0;}
+    .mb-section .caret{color:var(--accent); font-size:13px; transition:transform .2s ease;}
+    .mb-section.open .caret{transform:rotate(180deg);}
+    .mb-actions{display:flex; gap:8px; flex-shrink:0;}
+    .mb-btn{font-family:var(--sans); font-size:15px; font-weight:600; background:var(--surface); border:1px solid var(--line); color:var(--ink); border-radius:50%; width:38px; height:38px; cursor:pointer; line-height:1;}
+    .mb-btn:active{transform:scale(.92);}
+  }
+  .bsheet-wrap{position:fixed; inset:0; z-index:80; display:none;}
+  .bsheet-wrap.open{display:block;}
+  .bsheet-back{position:absolute; inset:0; background:rgba(15,13,10,.45); opacity:0; transition:opacity .25s ease;}
+  .bsheet-wrap.open .bsheet-back{opacity:1;}
+  .bsheet{position:absolute; left:0; right:0; bottom:0; background:var(--surface); border-radius:18px 18px 0 0; padding:10px 20px calc(24px + env(safe-area-inset-bottom)); box-shadow:0 -12px 40px rgba(15,13,10,.18); transform:translateY(100%); transition:transform .32s cubic-bezier(.22,.9,.3,1); max-height:78vh; overflow-y:auto;}
+  .bsheet-wrap.open .bsheet{transform:translateY(0);}
+  .bs-handle{width:38px; height:4px; border-radius:2px; background:var(--line); margin:4px auto 14px;}
+  .bs-title{font-family:var(--sans); font-size:11px; letter-spacing:2.2px; text-transform:uppercase; font-weight:700; color:var(--accent); margin-bottom:10px;}
+  .bs-row{display:flex; align-items:center; justify-content:space-between; width:100%; background:none; border:none; border-bottom:1px solid var(--line); padding:15px 2px; cursor:pointer; text-align:left;}
+  .bs-row:last-child{border-bottom:none;}
+  .bs-row .nm{font-family:var(--serif); font-size:19.5px; font-weight:600; color:var(--ink);}
+  .bs-row .ct{font-family:var(--sans); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; background:var(--def-bg); border-radius:12px; padding:3px 10px;}
+  .bs-row.active .nm{color:var(--accent);}
+  .bs-row.active .ct{background:var(--accent); color:var(--paper);}
+  .rs-block{margin-bottom:22px;}
+  .rs-label{font-family:var(--sans); font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:700; color:var(--muted); margin-bottom:10px;}
+  .rs-sizer{display:flex; align-items:center; gap:16px;}
+  .rs-sizer button{font-family:var(--serif); font-weight:700; background:var(--def-bg); border:1px solid var(--line); color:var(--ink); border-radius:12px; flex:1; padding:12px 0; cursor:pointer;}
+  .rs-sizer .sm{font-size:15px;} .rs-sizer .lg{font-size:23px;}
+  .rs-sizer button:disabled{opacity:.3;}
+  .rs-sizer button:active{transform:scale(.96);}
+  .rs-dots{display:flex; gap:6px; justify-content:center; margin-top:12px;}
+  .rs-dots span{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s ease;}
+  .rs-dots span.on{background:var(--accent);}
+  .rs-theme{display:flex; gap:8px;}
+  .rs-theme button{font-family:var(--sans); font-size:14px; font-weight:600; flex:1; padding:11px 0; border-radius:12px; border:1px solid var(--line); background:var(--def-bg); color:var(--ink); cursor:pointer;}
+  .rs-theme button.on{background:var(--accent); border-color:var(--accent); color:var(--paper);}
+
 </style>
 
 </head>
@@ -868,6 +909,83 @@
   document.getElementById('btn-fminus').addEventListener('click', function(){ if(fsIdx>0){ fsIdx--; applyFs(); } });
   document.getElementById('btn-fplus').addEventListener('click', function(){ if(fsIdx<fsSteps.length-1){ fsIdx++; applyFs(); } });
   applyFs();
+
+
+  /* ---- mobile nav: section sheet + reader sheet ---- */
+  var fullNames=['Telangana Real Estate','Telangana Politics','Bengaluru Real Estate','Karnataka Politics','Concept Library'];
+  var mb=document.createElement('div'); mb.className='mobilebar';
+  mb.innerHTML='<button class="mb-section" id="mb-sections">All Stories <span class="caret">▾</span></button>'
+    +'<div class="mb-actions"><button class="mb-btn" id="mb-search" aria-label="Search">⌕</button>'
+    +'<button class="mb-btn" id="mb-aa" aria-label="Reading settings">Aa</button></div>';
+  bar.insertBefore(mb, bar.firstChild);
+
+  function makeSheet(id, inner){
+    var w=document.createElement('div'); w.className='bsheet-wrap'; w.id=id;
+    w.innerHTML='<div class="bsheet-back"></div><div class="bsheet"><div class="bs-handle"></div>'+inner+'</div>';
+    document.body.appendChild(w);
+    w.querySelector('.bsheet-back').addEventListener('click', function(){ w.classList.remove('open'); });
+    var sy=0;
+    w.querySelector('.bsheet').addEventListener('touchstart', function(e){ sy=e.touches[0].clientY; }, {passive:true});
+    w.querySelector('.bsheet').addEventListener('touchend', function(e){ if(e.changedTouches[0].clientY - sy > 90) w.classList.remove('open'); }, {passive:true});
+    return w;
+  }
+
+  var rowsHtml='<div class="bs-title">Sections</div>';
+  rowsHtml+='<button class="bs-row active" data-pick="all"><span class="nm">All Stories</span><span class="ct" id="ct-all"></span></button>';
+  zones.forEach(function(z,i){
+    rowsHtml+='<button class="bs-row" data-pick="'+i+'"><span class="nm">'+(fullNames[i]||labels[i])+'</span><span class="ct" id="ct-'+i+'"></span></button>';
+  });
+  rowsHtml+='<button class="bs-row" data-pick="saved"><span class="nm">★ Saved stories</span><span class="ct" id="ct-saved"></span></button>';
+  var secSheet=makeSheet('sheet-sections', rowsHtml);
+
+  function sectionCounts(){
+    var all=0;
+    zones.forEach(function(z,i){
+      var n=z.querySelectorAll('.card[data-deep]').length; all+=n;
+      var el=document.getElementById('ct-'+i);
+      if(el) el.textContent = z.querySelector('.lib') ? (z.querySelectorAll('.lib dt').length+' terms') : (n+(n===1?' story':' stories'));
+    });
+    var a=document.getElementById('ct-all'); if(a) a.textContent=all+' stories';
+    var sv=document.getElementById('ct-saved'); if(sv) sv.textContent=Object.keys(starState).length+' saved';
+  }
+
+  document.getElementById('mb-sections').addEventListener('click', function(){
+    sectionCounts(); secSheet.classList.add('open');
+  });
+  secSheet.querySelectorAll('.bs-row').forEach(function(row){
+    row.addEventListener('click', function(){
+      var pick=row.getAttribute('data-pick');
+      var chip=bar.querySelector('.chip[data-tab="'+pick+'"]');
+      if(chip) chip.click();
+      secSheet.querySelectorAll('.bs-row').forEach(function(r){ r.classList.remove('active'); });
+      row.classList.add('active');
+      document.getElementById('mb-sections').innerHTML=row.querySelector('.nm').textContent+' <span class="caret">▾</span>';
+      secSheet.classList.remove('open');
+    });
+  });
+
+  var rsHtml='<div class="bs-title">Reading</div>'
+    +'<div class="rs-block"><div class="rs-label">Text size</div><div class="rs-sizer">'
+    +'<button class="sm" id="rs-minus">A−</button><button class="lg" id="rs-plus">A+</button></div>'
+    +'<div class="rs-dots" id="rs-dots"></div></div>'
+    +'<div class="rs-block"><div class="rs-label">Theme</div><div class="rs-theme">'
+    +'<button data-th="system">Auto</button><button data-th="light">Light</button><button data-th="dark">Dark</button></div></div>';
+  var rSheet=makeSheet('sheet-reader', rsHtml);
+  var dotsEl=rSheet.querySelector('#rs-dots');
+  fsSteps.forEach(function(){ var d=document.createElement('span'); dotsEl.appendChild(d); });
+  function rsSync(){
+    dotsEl.querySelectorAll('span').forEach(function(d,i){ d.classList.toggle('on', i<=fsIdx); });
+    rSheet.querySelector('#rs-minus').disabled = fsIdx<=0;
+    rSheet.querySelector('#rs-plus').disabled = fsIdx>=fsSteps.length-1;
+    rSheet.querySelectorAll('.rs-theme button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-th')===curTheme); });
+  }
+  rSheet.querySelector('#rs-minus').addEventListener('click', function(){ if(fsIdx>0){ fsIdx--; applyFs(); rsSync(); } });
+  rSheet.querySelector('#rs-plus').addEventListener('click', function(){ if(fsIdx<fsSteps.length-1){ fsIdx++; applyFs(); rsSync(); } });
+  rSheet.querySelectorAll('.rs-theme button').forEach(function(b){
+    b.addEventListener('click', function(){ curTheme=b.getAttribute('data-th'); applyTheme(); rsSync(); });
+  });
+  document.getElementById('mb-aa').addEventListener('click', function(){ rsSync(); rSheet.classList.add('open'); });
+  document.getElementById('mb-search').addEventListener('click', function(){ document.getElementById('btn-search').click(); });
 
   applyTheme(); progress();
 })();
