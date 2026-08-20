@@ -1,0 +1,13 @@
+{
+  "name": "The Deccan Ledger",
+  "short_name": "Deccan Ledger",
+  "description": "Daily construction, real-estate and politics briefing for Hyderabad, Telangana and Bengaluru",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6f6f2",
+  "theme_color": "#33418f",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
