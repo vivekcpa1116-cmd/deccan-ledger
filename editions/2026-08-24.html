@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#a8862c">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Deccan Ledger">
+<meta name="robots" content="noindex">
+<title>The Deccan Ledger</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --paper:#f6f3ec; --surface:#fffdf7; --ink:#161512; --muted:#6f6a60;
+    --line:#e7e1d4; --accent:#a8862c; --accent-soft:#f4edda; --seal:#9c3b2a;
+    --def-bg:#f0ebdf; --pro-bg:#f5efdf; --watch-bg:#e7efe7; --watch-edge:#1d6e4e;
+    --gold:#2f5d62;
+    --serif:"Didot","Bodoni 72",Baskerville,"Hoefler Text",Georgia,"Times New Roman",serif;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,sans-serif;
+  }
+  :root:not([data-theme="light"]){}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#141210; --surface:#1e1b17; --ink:#f0ece3; --muted:#9a938a;
+      --line:#35302a; --accent:#d9c27c; --accent-soft:#2a251c; --seal:#cf7a5f;
+      --def-bg:#262219; --pro-bg:#282318; --watch-bg:#20291f; --watch-edge:#6f9c78;
+      --gold:#7fa8ad;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#141210; --surface:#1e1b17; --ink:#f0ece3; --muted:#9a938a;
+    --line:#35302a; --accent:#d9c27c; --accent-soft:#2a251c; --seal:#cf7a5f;
+    --def-bg:#262219; --pro-bg:#282318; --watch-bg:#20291f; --watch-edge:#6f9c78;
+    --gold:#7fa8ad;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font:16.5px/1.62 var(--sans); padding-bottom:80px;}
+  .wrap{max-width:740px; margin:0 auto; padding:0 20px;}
+
+  header.masthead{border-bottom:1px solid var(--ink); padding:36px 0 16px; margin-bottom:6px;}
+  .masthead h1{font-family:var(--serif); font-size:40px; font-weight:700; letter-spacing:.2px; line-height:1.05; text-wrap:balance;}
+  .masthead h1 .tick{color:var(--accent);}
+  .masthead .sub{font-family:var(--sans); font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--muted); margin-top:10px;}
+  .masthead .date{font-family:var(--sans); font-size:12.5px; color:var(--muted); margin-top:5px; font-variant-numeric:tabular-nums;}
+  .hint{font-family:var(--sans); font-size:12.5px; line-height:1.55; color:var(--muted); border:1px solid var(--line); background:var(--surface); border-radius:6px; padding:10px 14px; margin:16px 0 4px;}
+  .hint b{color:var(--ink);}
+
+  section.zone{margin-top:40px;}
+  .zone-head{font-family:var(--sans); font-size:12px; letter-spacing:2.6px; text-transform:uppercase; font-weight:700; color:var(--accent); border-bottom:2px solid var(--accent); padding-bottom:6px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:baseline;}
+  .zone-head .count{font-weight:500; letter-spacing:.5px; color:var(--muted); font-size:11px;}
+
+  .card{background:var(--surface); border-bottom:1px solid var(--line); padding:22px 4px 14px 16px; cursor:pointer; position:relative;}
+  .card:hover{background:var(--accent-soft);}
+  .card:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .card.imp{border-left:3px solid var(--seal); padding-left:18px;}
+  .card.quiet{cursor:default; background:transparent; border-left:none; padding-left:16px;}
+  .card.quiet:hover{background:transparent;}
+  .card.quiet h2{font-size:15.5px; color:var(--muted); font-weight:500;}
+  .card.quiet .story{font-size:14.5px; color:var(--muted);}
+  .tag{display:inline-block; font-family:var(--sans); font-size:10px; font-weight:700; letter-spacing:1.8px; color:var(--seal); border:1px solid var(--seal); padding:2px 8px; border-radius:3px; margin-bottom:10px; text-transform:uppercase;}
+  .card h2{font-family:var(--serif); font-size:22px; font-weight:600; line-height:1.3; margin-bottom:7px; text-wrap:balance;}
+  .card.mini h2{font-size:17.5px;}
+  .srcline{font-family:var(--sans); font-size:11.5px; color:var(--muted); margin-bottom:11px; font-variant-numeric:tabular-nums;}
+  .srcline a{color:var(--accent); text-decoration:none;}
+  .srcline a:hover{text-decoration:underline;}
+  .card .story{margin-bottom:12px; max-width:64ch;}
+  .card.mini .story{font-size:15.5px; margin-bottom:9px;}
+  .why{background:var(--accent-soft); border-left:3px solid var(--accent); padding:9px 13px; font-size:15px; margin-bottom:12px; max-width:64ch;}
+  .why b{color:var(--accent);}
+  .block{background:var(--def-bg); border-radius:6px; padding:11px 15px; margin-bottom:11px; font-size:15px; max-width:66ch;}
+  .block h4{font-family:var(--sans); font-size:10.5px; letter-spacing:1.8px; text-transform:uppercase; color:var(--gold); margin-bottom:5px;}
+  .block p{margin-bottom:6px;}
+  .block p:last-child{margin-bottom:0;}
+  .deepbar{display:flex; justify-content:space-between; align-items:center; gap:10px; padding-top:6px;}
+  .deepbar span{font-family:var(--sans); font-size:11px; color:var(--muted); font-style:normal;}
+  .deep-btn{font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:.4px; color:var(--accent); background:transparent; border:1px solid var(--accent); padding:6px 15px; border-radius:4px; cursor:pointer; white-space:nowrap;}
+  .deep-btn:hover{background:var(--accent); color:var(--paper);}
+  .deep-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  .overlay{display:none; position:fixed; inset:0; background:rgba(15,17,22,.6); z-index:50; overflow-y:auto; padding:28px 14px;}
+  .overlay.open{display:block;}
+  .sheet{max-width:760px; margin:0 auto 40px; background:var(--surface); border-radius:10px; border:1px solid var(--line); padding:32px 36px; position:relative;}
+  .sheet .close{position:sticky; top:0; float:right; font-family:var(--sans); font-size:12.5px; font-weight:600; background:var(--ink); color:var(--paper); border:none; border-radius:4px; padding:7px 15px; cursor:pointer; z-index:2;}
+  .sheet h2{font-family:var(--serif); font-size:27px; font-weight:700; margin-bottom:4px; padding-right:80px; text-wrap:balance;}
+  .sheet .srcline{margin-bottom:20px;}
+  .dsec{margin-bottom:24px;}
+  .dsec h3{font-family:var(--sans); font-size:11px; letter-spacing:2.2px; text-transform:uppercase; font-weight:700; color:var(--accent); border-bottom:1px solid var(--line); padding-bottom:5px; margin-bottom:10px;}
+  .dsec p{margin-bottom:11px; max-width:66ch;}
+  .dsec ul{margin:0 0 11px 22px;}
+  .dsec li{margin-bottom:7px;}
+  .concept{background:var(--def-bg); border-radius:6px; padding:12px 15px; margin-bottom:10px; font-size:15.5px; max-width:66ch;}
+  .concept b.term{color:var(--accent);}
+  .pro{background:var(--pro-bg); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:6px; padding:16px 19px; max-width:66ch;}
+  .pro p{margin-bottom:11px;}
+  .pro p:last-child{margin-bottom:0;}
+  .watch{background:var(--watch-bg); border-left:3px solid var(--watch-edge); padding:10px 14px; margin-bottom:10px; max-width:66ch;}
+  .who-item{margin-bottom:9px; padding-left:14px; border-left:3px solid var(--gold);}
+
+  .lib{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:18px 20px; margin-top:4px;}
+  .lib h3{font-family:var(--sans); font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:700; color:var(--gold); margin:16px 0 9px; border-bottom:1px solid var(--line); padding-bottom:4px;}
+  .lib h3:first-child{margin-top:0;}
+  .lib dl{margin:0;}
+  .lib dt{font-weight:600; color:var(--accent); font-size:16px; margin-top:9px;}
+  .lib dd{margin:0 0 2px 0; font-size:15.5px; max-width:66ch;}
+  .lib dd .from{font-family:var(--sans); font-size:10.5px; letter-spacing:.6px; text-transform:uppercase; color:var(--muted);}
+  .lib .new{display:inline-block; font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:1.2px; color:var(--seal); border:1px solid var(--seal); padding:1px 5px; border-radius:3px; margin-left:6px; vertical-align:2px;}
+
+  footer{margin-top:52px; font-family:var(--sans); font-size:11.5px; letter-spacing:.4px; color:var(--muted); border-top:1px solid var(--ink); padding-top:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;}
+
+  @media (prefers-reduced-motion: no-preference){
+    .card{transition:background .15s ease;}
+    .deep-btn{transition:background .15s ease, color .15s ease;}
+  }
+  @media print{ .overlay,.deepbar,.hint{display:none !important;} .card{break-inside:avoid;} }
+  @media (max-width:600px){ .sheet{padding:22px 16px;} .masthead h1{font-size:30px;} }
+
+  /* ==== APP SHELL ==== */
+  .appbar{position:sticky; top:0; z-index:40; background:color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line); margin:0 -20px; padding:8px 14px;}
+  .appbar-row{display:flex; align-items:center; gap:8px; max-width:740px; margin:0 auto;}
+  .chips{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; flex:1; padding:2px 0;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:.3px; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:6px 13px; cursor:pointer; white-space:nowrap; transition:all .15s ease;}
+  .chip.active{background:var(--accent); border-color:var(--accent); color:var(--paper);}
+  .chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .icon-btn{font-family:var(--sans); font-size:15px; background:var(--surface); border:1px solid var(--line); color:var(--ink); border-radius:50%; width:34px; height:34px; cursor:pointer; flex-shrink:0; line-height:1;}
+  .icon-btn:hover{border-color:var(--accent); color:var(--accent);}
+  .searchrow{max-width:740px; margin:8px auto 0; display:none;}
+  .searchrow.open{display:block;}
+  .searchrow input{width:100%; font:15px var(--sans); padding:9px 14px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink);}
+  .searchrow input:focus{outline:2px solid var(--accent); border-color:var(--accent);}
+  .progressbar{max-width:740px; margin:8px auto 0; display:flex; align-items:center; gap:10px; font-family:var(--sans); font-size:11px; color:var(--muted);}
+  .ptrack{flex:1; height:4px; background:var(--line); border-radius:2px; overflow:hidden;}
+  .pfill{height:100%; width:0%; background:var(--accent); border-radius:2px; transition:width .4s ease;}
+  .star{position:absolute; top:14px; right:8px; background:none; border:none; font-size:17px; cursor:pointer; color:var(--line); padding:6px; line-height:1; z-index:2; transition:transform .15s ease, color .15s ease;}
+  .star.on{color:var(--gold);}
+  .star:hover{transform:scale(1.25);}
+  .readmark{display:inline-block; font-family:var(--sans); font-size:9.5px; font-weight:700; letter-spacing:1px; color:var(--watch-edge); margin-left:8px; vertical-align:2px;}
+  .card:active{transform:scale(.995);}
+  .overlay .sheet{animation:sheetup .28s ease;}
+  @keyframes sheetup{from{transform:translateY(28px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .lessonnav{display:flex; justify-content:space-between; gap:10px; border-top:1px solid var(--line); margin-top:20px; padding-top:14px;}
+  .lessonnav button{font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--accent); background:transparent; border:1px solid var(--accent); border-radius:6px; padding:9px 16px; cursor:pointer; max-width:48%; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .lessonnav button:hover{background:var(--accent); color:var(--paper);}
+  .lessonnav button:disabled{opacity:.35; pointer-events:none;}
+  .empty-msg{font-family:var(--sans); font-size:13.5px; color:var(--muted); text-align:center; padding:40px 0; display:none;}
+  @media (prefers-reduced-motion: reduce){ .overlay .sheet{animation:none;} .card:active{transform:none;} }
+
+
+  /* ==== MOBILE APP POLISH ==== */
+  .install-tip{font-family:var(--sans); font-size:13px; line-height:1.5; background:var(--accent-soft); border:1px solid var(--accent); color:var(--ink); border-radius:8px; padding:10px 36px 10px 14px; margin:12px 0 0; position:relative;}
+  .install-tip button{position:absolute; top:6px; right:6px; background:none; border:none; color:var(--muted); font-size:15px; cursor:pointer; padding:6px;}
+  @media (max-width:600px){
+    body{font-size:16.5px; padding-bottom:calc(60px + env(safe-area-inset-bottom));}
+    .wrap{padding:0 14px;}
+    .appbar{margin:0 -14px; padding:8px 12px calc(8px + 0px);}
+    .chip{padding:8px 14px; font-size:12.5px;}
+    .icon-btn{width:38px; height:38px; font-size:16px;}
+    .card{padding:18px 2px 12px 14px;}
+    .card.imp{padding-left:15px;}
+    .card h2{font-size:19px;}
+    .deep-btn{padding:9px 18px; font-size:13px;}
+    .star{top:10px; right:4px; font-size:19px; padding:8px;}
+    .sheet{padding:22px 16px calc(22px + env(safe-area-inset-bottom)); border-radius:14px 14px 0 0; margin-bottom:0;}
+    .overlay{padding:44px 0 0;}
+    .sheet h2{font-size:22px;}
+    .lessonnav button{padding:12px 14px; font-size:13px;}
+    .masthead h1{font-size:30px;}
+  }
+
+
+  /* ==== MOTION & MOBILE READABILITY ==== */
+  @media (max-width:600px){
+    body{font-size:18px;}
+    .card h2{font-size:21px; line-height:1.32;}
+    .card.mini h2{font-size:19px;}
+    .card .story{font-size:17px;}
+    .card.mini .story{font-size:16.5px;}
+    .srcline{font-size:12.5px;}
+    .why{font-size:16px;}
+    .sheet h2{font-size:24px;}
+    .dsec p{font-size:17.5px; line-height:1.66;}
+    .concept{font-size:16.5px;}
+    .pro{font-size:17px;}
+    .watch{font-size:16.5px;}
+    .who-item{font-size:16.5px;}
+    .chip{font-size:13px; padding:9px 15px;}
+    .lib dt{font-size:17px;}
+    .lib dd{font-size:16px;}
+    .zone-head{font-size:12.5px;}
+    .hint{font-size:13.5px;}
+    .progressbar{font-size:12px;}
+    .deepbar span{display:none;}
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .card.anim{animation:cardin .5s cubic-bezier(.22,.9,.3,1) both;}
+    @keyframes cardin{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
+    .overlay.open{animation:ovfade .25s ease;}
+    @keyframes ovfade{from{opacity:0;} to{opacity:1;}}
+    .overlay .sheet{animation:sheetup .34s cubic-bezier(.22,.9,.3,1);}
+    .card{transition:background .18s ease, transform .18s ease, box-shadow .18s ease;}
+    .card:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(22,21,18,.07);}
+    .star.pop{animation:starpop .35s cubic-bezier(.3,1.6,.5,1);}
+    @keyframes starpop{0%{transform:scale(.6);} 60%{transform:scale(1.45);} 100%{transform:scale(1);}}
+    .readmark{animation:markin .3s ease both;}
+    @keyframes markin{from{opacity:0; transform:translateX(-4px);} to{opacity:1;}}
+    .pfill{transition:width .6s cubic-bezier(.22,.9,.3,1);}
+    .chip{transition:background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease;}
+    .chip:active{transform:scale(.94);}
+    .deep-btn:active{transform:scale(.96);}
+    .lessonnav button{transition:background .18s ease, color .18s ease;}
+  }
+
+
+  /* ==== FONT SIZE CONTROL ==== */
+  .icon-btn.fs{font-size:12px; font-weight:700; width:32px; letter-spacing:-.5px;}
+  .icon-btn:disabled{opacity:.3; pointer-events:none;}
+  @media (max-width:600px){ .icon-btn.fs{width:34px; font-size:13px;} }
+
+
+  /* ==== MOBILE NAV: SECTION + READER SHEETS ==== */
+  .mobilebar{display:none;}
+  @media (max-width:700px){
+    .appbar-row{display:none;}
+    .mobilebar{display:flex; align-items:center; justify-content:space-between; gap:10px; max-width:740px; margin:0 auto; padding:2px 0;}
+    .mb-section{font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink); background:none; border:none; padding:8px 4px; cursor:pointer; display:flex; align-items:center; gap:7px; min-width:0;}
+    .mb-section .caret{color:var(--accent); font-size:13px; transition:transform .2s ease;}
+    .mb-section.open .caret{transform:rotate(180deg);}
+    .mb-actions{display:flex; gap:8px; flex-shrink:0;}
+    .mb-btn{font-family:var(--sans); font-size:15px; font-weight:600; background:var(--surface); border:1px solid var(--line); color:var(--ink); border-radius:50%; width:38px; height:38px; cursor:pointer; line-height:1;}
+    .mb-btn:active{transform:scale(.92);}
+  }
+  .bsheet-wrap{position:fixed; inset:0; z-index:80; display:none;}
+  .bsheet-wrap.open{display:block;}
+  .bsheet-back{position:absolute; inset:0; background:rgba(15,13,10,.45); opacity:0; transition:opacity .25s ease;}
+  .bsheet-wrap.open .bsheet-back{opacity:1;}
+  .bsheet{position:absolute; left:0; right:0; bottom:0; background:var(--surface); border-radius:18px 18px 0 0; padding:10px 20px calc(24px + env(safe-area-inset-bottom)); box-shadow:0 -12px 40px rgba(15,13,10,.18); transform:translateY(100%); transition:transform .32s cubic-bezier(.22,.9,.3,1); max-height:78vh; overflow-y:auto;}
+  .bsheet-wrap.open .bsheet{transform:translateY(0);}
+  .bs-handle{width:38px; height:4px; border-radius:2px; background:var(--line); margin:4px auto 14px;}
+  .bs-title{font-family:var(--sans); font-size:11px; letter-spacing:2.2px; text-transform:uppercase; font-weight:700; color:var(--accent); margin-bottom:10px;}
+  .bs-row{display:flex; align-items:center; justify-content:space-between; width:100%; background:none; border:none; border-bottom:1px solid var(--line); padding:15px 2px; cursor:pointer; text-align:left;}
+  .bs-row:last-child{border-bottom:none;}
+  .bs-row .nm{font-family:var(--serif); font-size:19.5px; font-weight:600; color:var(--ink);}
+  .bs-row .ct{font-family:var(--sans); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; background:var(--def-bg); border-radius:12px; padding:3px 10px;}
+  .bs-row.active .nm{color:var(--accent);}
+  .bs-row.active .ct{background:var(--accent); color:var(--paper);}
+  .rs-block{margin-bottom:22px;}
+  .rs-label{font-family:var(--sans); font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:700; color:var(--muted); margin-bottom:10px;}
+  .rs-sizer{display:flex; align-items:center; gap:16px;}
+  .rs-sizer button{font-family:var(--serif); font-weight:700; background:var(--def-bg); border:1px solid var(--line); color:var(--ink); border-radius:12px; flex:1; padding:12px 0; cursor:pointer;}
+  .rs-sizer .sm{font-size:15px;} .rs-sizer .lg{font-size:23px;}
+  .rs-sizer button:disabled{opacity:.3;}
+  .rs-sizer button:active{transform:scale(.96);}
+  .rs-dots{display:flex; gap:6px; justify-content:center; margin-top:12px;}
+  .rs-dots span{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s ease;}
+  .rs-dots span.on{background:var(--accent);}
+  .rs-theme{display:flex; gap:8px;}
+  .rs-theme button{font-family:var(--sans); font-size:14px; font-weight:600; flex:1; padding:11px 0; border-radius:12px; border:1px solid var(--line); background:var(--def-bg); color:var(--ink); cursor:pointer;}
+  .rs-theme button.on{background:var(--accent); border-color:var(--accent); color:var(--paper);}
+
+</style>
+
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:9999;background:#161512;color:#f6f3ec;font-family:Inter,-apple-system,sans-serif;font-size:14px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;"><span>&#128218; Archived edition &middot; Monday, 24 August 2026</span><a href="../index.html" style="color:#e8c469;text-decoration:none;font-weight:600;white-space:nowrap;">&#8249; Today&rsquo;s paper</a></div>
+<div class="wrap">
+<header class="masthead">
+  <h1>The Deccan Ledger<span class="tick">.</span></h1>
+  <div class="sub">Construction &middot; Real Estate &middot; Politics &mdash; Hyderabad &middot; Telangana &middot; Bengaluru</div>
+  <div class="date">Monday, 24 August 2026 &middot; 9:00 AM IST &middot; news published in the last 24 hours only</div>
+</header>
+
+<div class="hint">💡 <b>Every card is news from the last 24 hours</b> — publish time on each. Summaries up front; <b>press a card (or Go deep)</b> to open its full lesson: backstory, concepts from zero, and the make-me-a-pro story. Quiet sections say so honestly. Scroll to the bottom for the <b>Concept Library</b> — your growing textbook. <i>Sourcing note: direct article fetch was blocked across every publisher again today, so every fact below is cross-checked across 2+ independently reported outlets via search rather than read off one original page, and exact clock times are shown only where a source's own reporting (or a timestamped wire URL) stated them — flagged wherever timing was uncertain.</i></div>
+
+<!-- ==================== TELANGANA REAL ESTATE ==================== -->
+<section class="zone">
+  <div class="zone-head">Telangana Real Estate</div>
+
+  <div class="card quiet">
+    <h2>A quiet 24 hours for confirmed Telangana real-estate news — but the Section 22A fight has moved into the political arena (see Telangana Politics)</h2>
+    <div class="story">No standalone Hyderabad/Telangana real-estate or construction story could be confidently dated to this exact 24-hour window today. The dominant land story — Section 22A — is very much alive but made its fresh news as politics: BRS's T. Harish Rao threatened on 23 August to stall the Assembly and lay siege to the Secretariat over wrongly-listed colonies (carried in the Telangana Politics section below, because that's where today's development actually happened). No fresh, dated movement either on: HMDA's e-auction cycle (multiple outlets earlier flagged an auction window running roughly 24 Aug–9 Sept across Mokila, Bachupally, Neopolis and other layouts — if it opened today, no same-day result had been reported by press time, so it's a watch-item, not news); the Regional Ring Road North tender; TGIIC's Raidurg record (₹264 crore/acre, but that was 21 August — outside the window); the TDR rules under G.O.Ms.No.218; or the CURE/Land Pooling Bill. They'll reappear here the day they make fresh, dated news.</div>
+  </div>
+</section>
+
+<!-- ==================== TELANGANA POLITICS ==================== -->
+<section class="zone">
+  <div class="zone-head">Telangana Politics</div>
+
+  <div class="card imp" data-deep="m-revanth-return">
+    <span class="tag">IMPORTANT</span>
+    <h2>Revanth Reddy flies home from London after the Centre blocks his US leg on a "political" ground — and promises to "speak in Hyderabad"</h2>
+    <div class="srcline">Sources: ANI, The South First, Deccan Herald &amp; The Hans India &middot; published 23 Aug 2026 (ANI wire timestamped ~8:17 PM IST)</div>
+    <div class="story">
+      <p>Chief Minister A. Revanth Reddy cut short his "Telangana Rising" tour and returned to Hyderabad from London on 23 August, after the Ministry of External Affairs cleared the UK leg but denied political clearance for the US leg, which the MEA said involved a "planned programme not appropriate to the office held." Revanth called the denial politically motivated and said he would explain the matter in detail at a press conference once back in Hyderabad. He thanked AICC president Mallikarjun Kharge for his backing and, rather than cancel outright, ordered the official delegation to continue to the US to sign MoUs with Harvard, MIT, Northeastern and Virginia Tech in his absence.</p>
+    </div>
+    <div class="why"><b>Why it matters to you:</b> the CM is now physically back in Hyderabad — the trigger multiple reports said could unlock decisions on the Konda Surekha Cabinet question and other pending matters. Watch what he actually does in the next few days, not what the tour headlines promised: the investment MoUs are intent, not funded projects.</div>
+    <div class="deepbar"><span>Press for the full Centre-state clash and what it signals</span><button class="deep-btn" data-open="m-revanth-return">Go deep ▸</button></div>
+  </div>
+
+  <div class="card imp" data-deep="m-harish-22a">
+    <span class="tag">IMPORTANT</span>
+    <h2>Harish Rao threatens to stall the Assembly and gherao the Secretariat over Section 22A — names three colonies he wants struck off the freeze list</h2>
+    <div class="srcline">Sources: Deccan Chronicle, Telangana Today &amp; The Hans India &middot; published 23 Aug 2026 (exact clock time not stated in source)</div>
+    <div class="story">
+      <p>BRS deputy floor leader T. Harish Rao escalated the Section 22A land-freeze fight at a party meeting in Boduppal supporting affected residents, warning that BRS would stall the coming Assembly session and lay siege to ("gherao") the Secretariat if the Congress government does not withdraw what he called unjust prohibitory listings. He specifically demanded that Tirumala Meadows, Lakshmi Ganapathi and Hemanagar colonies be removed from the Section 22A restricted list, alleging fully registered houses were being placed under the freeze to enable illegal collections, and that middle-class families could no longer get bank loans or sell their properties as a result.</p>
+    </div>
+    <div class="why"><b>Why it matters to you:</b> this is the exact mechanism that can freeze a plot mid-deal — a registered, patta property swept onto the 22A list. Note the named colonies (all Boduppal/Medchal-Malkajgiri side) as elevated-risk zones, and treat "it's registered" as necessary but not sufficient until you've personally checked the live 22A list for the survey number.</div>
+    <div class="deepbar"><span>Press for how a registered home ends up frozen</span><button class="deep-btn" data-open="m-harish-22a">Go deep ▸</button></div>
+  </div>
+
+  <div class="card mini" data-deep="m-surekha-kharge">
+    <h2>Konda Surekha flies to Bengaluru to meet Kharge — who tells her to settle the rift with the state unit, not the high command</h2>
+    <div class="srcline">Sources: The Hans India &amp; NTV Telugu &middot; published 23 Aug 2026 (Sunday; exact clock time not stated in source)</div>
+    <div class="story">Endowments &amp; Forest Minister Konda Surekha met AICC president Mallikarjun Kharge in Bengaluru (reportedly for about 15 minutes) to brief him on the Congress rift caused by her daughter Konda Sushmita's remarks against CM Revanth Reddy. Surekha maintained that neither she nor her daughter had criticised the party or the Gandhi family and alleged a conspiracy targeting her family. Kharge reportedly expressed displeasure, cautioned her against remarks that hurt party interests, and told her to resolve it with the TPCC. No formal Cabinet decision on her position has been reported.</div>
+    <div class="why"><b>Why it matters to you:</b> her portfolio covers Endowments &amp; Forest land — two of the trickiest boundary categories a plotting developer can run into. A reshuffle here is worth tracking, but the takeaway today is the political grammar: going over the state unit's head to the high command got her sent right back down to the state unit.</div>
+    <div class="deepbar"><button class="deep-btn" data-open="m-surekha-kharge">Go deep ▸</button></div>
+  </div>
+
+  <div class="card mini" data-deep="m-ktr-1000">
+    <h2>KTR sets a week-long BRS offensive from Sept 2, timed to the Congress government's 1,000th day: "not one promise fully kept"</h2>
+    <div class="srcline">Sources: ANI &amp; Siasat &middot; published 24 Aug 2026 (ANI wire timestamped ~2:44 AM IST)</div>
+    <div class="story">BRS Working President K.T. Rama Rao (KTR) announced a statewide week-long campaign starting 2 September, timed to the Congress government completing 1,000 days in office, to spotlight what BRS calls its "betrayal" of election promises. KTR said Congress made 420 promises, 13 declarations and six guarantees claiming implementation within 100 days, but had "not fully fulfilled even a single promise" after 1,000 days. He directed cadres to hand out "Baaki Cards" (pending-dues cards) listing unfulfilled welfare commitments to each social group.</div>
+    <div class="why"><b>Why it matters to you:</b> a milestone-timed opposition campaign is a signal, not noise — it tells you which promises the government will feel most pressure to be seen delivering. Anything land- or housing-linked (2BHK schemes, plot regularisation, compensation) tends to get pushed hardest in exactly these anniversary windows.</div>
+    <div class="deepbar"><button class="deep-btn" data-open="m-ktr-1000">Go deep ▸</button></div>
+  </div>
+</section>
+
+<!-- ==================== BENGALURU REAL ESTATE ==================== -->
+<section class="zone">
+  <div class="zone-head">Bengaluru Real Estate</div>
+
+  <div class="card quiet">
+    <h2>Quiet on MUDA, the BDA and guidance value — the parkland fight is today's live land story, and it's playing out as politics</h2>
+    <div class="story">No fresh, in-window Bengaluru real-estate transaction news today. The big land-law story — Karnataka's bill to let government "alienate" up to 5% of any park (Cubbon Park, Lalbagh included) — made its fresh news as a political fight, with BJP state chief B.Y. Vijayendra vowing to block it (carried in Karnataka Politics below). No dated movement on: MUDA's 1,100-site cancellation implementation, ITI's 44-acre K.R. Puram e-auction (technical bids due 16 Sept), the BDA's 69-site e-auction (registration closed 21 Aug, no results reported yet), the still-un-notified guidance-value hike, or Governor's assent on the Karnataka Apartment (Ownership and Management) Bill passed 21 August. Worth checking the BDA auction result again tomorrow.</div>
+  </div>
+</section>
+
+<!-- ==================== KARNATAKA POLITICS ==================== -->
+<section class="zone">
+  <div class="zone-head">Karnataka Politics</div>
+
+  <div class="card imp" data-deep="m-nagendra-siege">
+    <span class="tag">IMPORTANT</span>
+    <h2>BJP and JD(S) announce a siege of Vidhana Soudha this morning over the Valmiki Corporation scam — demanding Minister Nagendra's removal</h2>
+    <div class="srcline">Sources: ANI, Siasat, Deccan Chronicle &amp; The Hans India &middot; published 23 Aug 2026 (ANI wire timestamped ~12:43 PM IST); the siege itself is scheduled for 9:30 AM 24 Aug — after press time</div>
+    <div class="story">
+      <p>Karnataka Leader of the Opposition R. Ashoka announced that the BJP, with ally JD(S), would march from Freedom Park and lay siege to Vidhana Soudha at 9:30 AM on Monday, 24 August, demanding the removal of Planning &amp; Statistics Minister B. Nagendra over the Karnataka Maharshi Valmiki Scheduled Tribes Development Corporation scam. Ashoka said an initial ₹89 crore was illegally transferred from the corporation's Union Bank account to various accounts, with the overall alleged diversion later pegged at about ₹187 crore — money he claimed was used to fund Congress campaigns. He said JD(S) chief H.D. Kumaraswamy backed continuing the agitation for another week, and that the BJP had compiled details of 35 cases against Nagendra spanning mining and the Valmiki Corporation.</p>
+    </div>
+    <div class="why"><b>Why it matters to you:</b> this is the same pattern as yesterday's story — the government gave Nagendra an <i>extra</i> portfolio rather than remove him. The lesson for a developer is institutional: watch what happens to a minister who controls large discretionary funds under fire — a government that digs in is telling you where real power sits, which is what actually governs how discretionary land and money get allotted.</div>
+    <div class="deepbar"><span>Press for the scam, the siege and why he keeps his job</span><button class="deep-btn" data-open="m-nagendra-siege">Go deep ▸</button></div>
+  </div>
+
+  <div class="card mini" data-deep="m-vijayendra-parks">
+    <h2>BJP chief Vijayendra vows to fight Karnataka's park-land bill: a "systematic conspiracy" to take over protected green space</h2>
+    <div class="srcline">Sources: The Federal &amp; ANI wire (syndicated) &middot; published 23 Aug 2026 (exact clock time not stated in source)</div>
+    <div class="story">Karnataka BJP president B.Y. Vijayendra said the party would "make every possible effort to prevent" the Karnataka Government Parks (Preservation) Amendment Bill, calling it "a systematic conspiracy to take over government parks reserved for environmental protection, public health safeguards and other public uses." The bill, cleared by Cabinet on 21–22 August, would let up to 5% of any government park or garden be alienated — sold, leased, gifted, exchanged or mortgaged — for public infrastructure. Critics tie it to the roughly ₹17,770-crore Hebbal–Silk Board tunnel road, which reportedly needs about six acres of Lalbagh temporarily and one acre permanently.</div>
+    <div class="why"><b>Why it matters to you:</b> yesterday you learned the bill exists; today's lesson is that "Cabinet cleared" is only step one — it still needs Assembly passage, Council, and the Governor's assent, and an organised opposition can slow or reshape it at each stage. Never treat a protected-land carve-out as done until it's notified.</div>
+    <div class="deepbar"><button class="deep-btn" data-open="m-vijayendra-parks">Go deep ▸</button></div>
+  </div>
+</section>
+
+<!-- ==================== CONCEPT LIBRARY ==================== -->
+<section class="zone">
+  <div class="zone-head">Concept Library <span class="count">Vivek&rsquo;s growing textbook</span></div>
+  <div class="lib">
+
+    <h3>Land Titles &amp; Registration</h3>
+    <dl>
+      <dt>Registration — why it&rsquo;s everything</dt><dd>You legally own immovable property only once the sale deed is <b>registered</b> with stamp duty paid — not merely once you&rsquo;ve paid for it. Block registration and you&rsquo;ve effectively frozen the property. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>Prohibited list (Section 22A)</dt><dd>A district-wise register of survey numbers sub-registrars must refuse to register — legitimately covering government, endowment/wakf and ceiling-surplus land, but dangerous because it works on survey numbers, which can wrongly sweep up private land sharing or mistyped into a listed number. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>Colony-level over-listing (22A) <span class="new">NEW</span></dt><dd>The specific harm Harish Rao is attacking: instead of one stray survey number, entire registered residential colonies get added to the 22A list in a batch — freezing hundreds of clean, patta homes at once so owners can&rsquo;t sell or raise a loan. It&rsquo;s the difference between a typo and a dragnet, and it&rsquo;s why he can name whole colonies (Tirumala Meadows, Lakshmi Ganapathi, Hemanagar) rather than individual plots. <span class="from">— taught by: Harish Rao&rsquo;s 22A Assembly threat</span></dd>
+      <dt>De-notification</dt><dd>The formal process of striking a property off a prohibited/restricted list so it becomes transactable again — the exact step the alleged “30% commission” racket sits on top of. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>Patta land</dt><dd>Land for which the owner holds a formal government-issued title deed, as opposed to disputed, assigned, or government land — the category Section 22A is meant to exclude, and the category getting wrongly trapped by it. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>Regularisation, GOs and memos</dt><dd>Governments legalise occupied or exempted land over the decades through Government Orders — but a regularised parcel is only clean on paper if that GO is attached to its record. Collect the GO/memo history, not just the sale deed. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>TSLR vs GHMC numbering</dt><dd>Hyderabad has two parallel address systems — a 1969&ndash;70 Town Survey Land Records numbering and GHMC&rsquo;s own ward/block numbers. Mismatches between the two have turned private homes into “government land” on paper. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>ULC (Urban Land Ceiling)</dt><dd>A repealed law that once capped urban landholding; the exemption/surrender records it left behind still matter, since several exempted parcels were wrongly re-listed for want of an entered exemption. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>Waqf land</dt><dd>Property permanently donated for Muslim religious purposes under a central Act — state revenue officers cannot simply delete waqf entries, so colonies near old disputed waqf land face the slowest 22A-style resolution. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>Dharani vs Bhu Bharati</dt><dd>Dharani was the previous government&rsquo;s land-records portal; Bhu Bharati is the current replacement. Errors made migrating data between the two are the government&rsquo;s own explanation for the 22A crisis. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>Khata (and a khata freeze)</dt><dd>The municipal record that puts a property on the local tax/ownership rolls — without it you can&rsquo;t cleanly get a bank loan, utility connections, or resell. Freezing khata issuance on a batch of sites (as happened with 1,100 MUDA plots) makes them unsellable overnight even though the sale deed still exists. <span class="from">— taught by: the MUDA cancellation&rsquo;s implementation</span></dd>
+      <dt>Cancellation vs title</dt><dd>An allotment-based title can be undone at the root: if the original government allotment was illegal, everything built on it since — deeds, registrations, loans — can collapse. Registration records a transaction; it doesn&rsquo;t purify a rotten source. <span class="from">— taught by: the MUDA scam</span></dd>
+      <dt>Development authority (built-in conflict)</dt><dd>Bodies like MUDA, BDA and HMDA both make the rules (approvals) and play the game (own and sell land) — a structural conflict of interest that land scandals tend to grow from. <span class="from">— taught by: the MUDA scam</span></dd>
+      <dt>Alternative-site / 50:50 compensation</dt><dd>Paying a landowner in developed plots instead of cash when their raw land is acquired — the honest version is transparent and formula-based (like land pooling); the abused version becomes a discretionary currency for favours. <span class="from">— taught by: the MUDA scam</span></dd>
+      <dt>Commission of Inquiry</dt><dd>A judge-led fact-finding body that can recommend but not punish — its power is legitimacy: acting on a judge&rsquo;s report is politically defensible, ignoring one is costly. <span class="from">— taught by: the MUDA scam</span></dd>
+      <dt>JDA and benami (the coercive version)</dt><dd>A Joint Development Agreement — landowner contributes land, developer builds, they split the result — is your core, legal business. The dirty cousin: get land blacklisted, owner turns desperate, a “partner” appears offering 50:50 through a benami (name-lender) entity. <span class="from">— taught by: the Section 22A saga</span></dd>
+      <dt>Restoration vs redevelopment</dt><dd>Restoration repairs what exists; redevelopment replaces what failed. Good heritage projects mix both instead of bulldozing everything. <span class="from">— taught by: the Mir Alam Mandi revamp</span></dd>
+      <dt>Phased execution</dt><dd>Build a section, shift occupants in, build the next — slower and costlier per square foot, but livelihoods survive the construction, unlike a clear-everyone-out-and-build-fast approach. <span class="from">— taught by: the Mir Alam Mandi revamp</span></dd>
+      <dt>Reserve price vs sale price</dt><dd>A published reserve is only the floor an auctioneer will accept — the actual winning bid in a competitive e-auction can land well above it, as TGIIC&rsquo;s Raidurg auctions have now shown twice. <span class="from">— taught by: ITI&rsquo;s Bengaluru land e-auction; confirmed again by the Raidurg record</span></dd>
+      <dt>PSU land monetisation / NLMC</dt><dd>The National Land Monetization Corporation is the central vehicle that professionally values and auctions off surplus land held by old public-sector companies inside cities that grew up around their factories/offices — a leading government-supply signal for local land markets. <span class="from">— taught by: ITI&rsquo;s Bengaluru land e-auction</span></dd>
+      <dt>RMP zoning</dt><dd>Bengaluru&rsquo;s statutory Revised Master Plan tags every parcel with a permitted use; a “Commercial (Business)” tag means a buyer can build offices without a fresh land-use conversion — a major value driver baked into the price. <span class="from">— taught by: ITI&rsquo;s Bengaluru land e-auction</span></dd>
+      <dt>TGIIC vs HMDA</dt><dd>Two different Telangana government bodies both sell/auction Hyderabad-area land — TGIIC out of an industrial-development mandate, HMDA out of an urban-planning one. Knowing which one you&rsquo;re dealing with matters, since their land banks, rules and pricing patterns differ. <span class="from">— taught by: the Raidurg auction record</span></dd>
+      <dt>MSTC e-auction platform</dt><dd>A central PSU-run online bidding portal used by many government bodies to run transparent land/asset auctions — competitively bid, published-reserve pricing that&rsquo;s far harder to under-report than a privately negotiated sale, which is why auction results become the market&rsquo;s reference price. <span class="from">— taught by: the Raidurg auction record</span></dd>
+      <dt>RERA Section 10 (agent liability)</dt><dd>RERA doesn&rsquo;t just regulate builders — a registered real-estate agent who markets or books units in a project that isn&rsquo;t itself RERA-registered can personally be ordered to refund buyers with interest. “I was just the broker” is not a defence. <span class="from">— taught by: a TG-RERA refund order</span></dd>
+      <dt>Alienation of protected land</dt><dd>In Indian land law, “alienation” means the legal transfer of ownership or rights out of a protected/public category — via sale, lease, gift, exchange or mortgage — into a different use. It doesn&rsquo;t mean abandonment; it means converting the land&rsquo;s legal status, which is exactly what Karnataka&rsquo;s new park-land bill lets government do to up to 5% of any park. <span class="from">— taught by: Karnataka&rsquo;s park-land alienation bill</span></dd>
+    </dl>
+
+    <h3>Building &amp; Apartment Law</h3>
+    <dl>
+      <dt>RWA (Residents&rsquo; Welfare Association) mandate</dt><dd>The single legally-recognised body representing all owners in a completed apartment project. Karnataka&rsquo;s new law requires exactly one per project, even multi-phase ones, closing a loophole where developers split large complexes into multiple weak associations to dodge accountability. <span class="from">— taught by: Karnataka&rsquo;s Apartment Ownership Bill</span></dd>
+      <dt>75% redevelopment consent</dt><dd>The ownership-majority threshold a Karnataka apartment complex now needs to approve redevelopment. Owners who refuse can still be bought out, but only at twice independently-assessed market value — protecting holdouts without letting one owner block an entire rebuild. <span class="from">— taught by: Karnataka&rsquo;s Apartment Ownership Bill</span></dd>
+      <dt>Structural safety audit</dt><dd>A certified engineer&rsquo;s mandatory, repeating (every 5 years) inspection for any building over 30 years old — a paper trail a buyer should now always ask for on an older Bengaluru apartment. <span class="from">— taught by: Karnataka&rsquo;s Apartment Ownership Bill</span></dd>
+      <dt>Private-road municipal takeover</dt><dd>A municipality can now declare a poorly-maintained layout&rsquo;s internal road a “public road” and take over its upkeep — with zero compensation to whoever owned it — the moment it&rsquo;s judged a public-safety risk. <span class="from">— taught by: Karnataka&rsquo;s municipal amendment bills</span></dd>
+    </dl>
+
+    <h3>Government Money &amp; Institutions</h3>
+    <dl>
+      <dt>Welfare-corporation scam <span class="new">NEW</span></dt><dd>State governments run development corporations (for SCs, STs, minorities, backward classes) that hold budgeted welfare money in bank accounts. The classic fraud: funds are quietly transferred out of the corporation&rsquo;s account into a web of shell/personal accounts, then allegedly recycled — here, ₹89 crore transferred out, an overall ~₹187 crore diversion alleged from the Valmiki (ST) Corporation. The tell is always a welfare pot with weak oversight and a minister-in-charge who controls it. <span class="from">— taught by: the Valmiki Corporation scam</span></dd>
+      <dt>Revenue deficit</dt><dd>Daily income minus daily bills, with no asset creation either side — a state running one is borrowing just to pay salaries and pensions, like taking a loan for groceries. <span class="from">— taught by: Telangana&rsquo;s CAG report</span></dd>
+      <dt>Fiscal deficit</dt><dd>The full year&rsquo;s borrowing need, including money spent building assets. Borrowing to build a road can pay for itself; borrowing for groceries can&rsquo;t — the ratio between the two deficits tells you which kind of borrower a state is. <span class="from">— taught by: Telangana&rsquo;s CAG report</span></dd>
+      <dt>Committed expenditure</dt><dd>Salaries, pensions and interest — the untouchable first claim on every rupee. When it eats the budget, infrastructure that moves land prices fights for scraps. <span class="from">— taught by: Telangana&rsquo;s CAG report</span></dd>
+      <dt>Devolution / Finance Commission share</dt><dd>Every five years a Finance Commission decides what slice of central taxes each state gets. A state that grows faster and controls population better can still see its share shrink, since formulas partly weight population — Karnataka says this cost it ₹65,000 crore over six years. <span class="from">— taught by: the Southern Zonal Council</span></dd>
+      <dt>Schedule IX / Schedule X institutions</dt><dd>Lists of government companies and institutions the 2014 AP Reorganisation Act said must be divided between Telangana and Andhra Pradesh — 23 of them remain undivided twelve years on, a long-running bureaucratic fight over shared assets. <span class="from">— taught by: the Southern Zonal Council</span></dd>
+      <dt>Mines and Minerals (Development and Regulation) Act</dt><dd>The central law governing who can tax and regulate mineral extraction. States want more taxing power over mining within their own territory; the Centre has historically resisted for the sake of national uniformity. <span class="from">— taught by: the Southern Zonal Council</span></dd>
+      <dt>Political clearance (MEA)</dt><dd>Before any Chief Minister travels abroad, the Ministry of External Affairs must clear both the trip and its itinerary. The Centre can approve one leg of a multi-country tour (UK) and deny another (US) of the very same trip, and the state has no legal recourse to override it. <span class="from">— taught by: the Revanth US clearance denial</span></dd>
+      <dt>G.O. (Government Order) as institutional restructuring</dt><dd>A single G.O. can fold entire departments or classes of institutions into a new body overnight, without a legislative vote — the same sweeping-order power that created the Section 22A mess reshaped technical education via GO 97. <span class="from">— taught by: the GO 97 protests</span></dd>
+      <dt>Article 371J / regional development boards</dt><dd>A special constitutional provision giving Karnataka&rsquo;s historically underdeveloped Kalyana Karnataka (former Hyderabad-Karnataka) region its own dedicated development fund and a minister-in-charge, separate from general state administration — control of it is a real perk, which is why handing it to a scandal-hit minister reads as government support, not punishment. <span class="from">— taught by: Minister Nagendra&rsquo;s additional charge</span></dd>
+      <dt>Academic diplomacy / MoU tourism</dt><dd>A state government courting foreign universities and investors through headline-friendly Memoranda of Understanding — genuinely useful for long-term ties, but an MoU is a statement of intent, not a binding, funded commitment; it can be announced with fanfare and quietly go nowhere. <span class="from">— taught by: Revanth&rsquo;s Cambridge/Oxford visits</span></dd>
+    </dl>
+
+    <h3>Political Machinery</h3>
+    <dl>
+      <dt>Gherao / laying siege <span class="new">NEW</span></dt><dd>A physical protest form: demonstrators surround a government building (the Secretariat, Vidhana Soudha) to blockade it and force attention, distinct from inside-the-House disruption. It&rsquo;s theatre with a purpose — dominate the news cycle and pressure the government — and both Harish Rao (threatening a Secretariat gherao over 22A) and Karnataka&rsquo;s BJP-JD(S) (a planned 9:30 AM siege of Vidhana Soudha) reached for it in the same 24 hours. <span class="from">— taught by: the 22A threat &amp; the Vidhana Soudha siege</span></dd>
+      <dt>Milestone / anniversary campaigning <span class="new">NEW</span></dt><dd>Oppositions deliberately time big offensives to a government&rsquo;s round-number milestones (100 days, 1,000 days) because the date itself is a free headline and forces a &ldquo;promises vs delivery&rdquo; scorecard. Watch which promises get pushed hardest to be seen as delivered right before such a date — often the housing/land/welfare ones. <span class="from">— taught by: KTR&rsquo;s 1,000-day campaign</span></dd>
+      <dt>TPCC &amp; showcause notice</dt><dd>The Telangana Pradesh Congress Committee is the state party unit; a showcause notice demands a written explanation — usually more warning shot than punishment, and step one of any internal discipline process. <span class="from">— taught by: the Konda Surekha episodes</span></dd>
+      <dt>Going over the state unit&rsquo;s head <span class="new">NEW</span></dt><dd>When a state leader in trouble appeals directly to the national high command instead of the state party, the high command often bounces it right back down — telling them to settle it locally. That &ldquo;go sort it with the state unit&rdquo; response is itself a signal: the centre isn&rsquo;t willing to spend capital protecting you. <span class="from">— taught by: Konda Surekha&rsquo;s Kharge meeting</span></dd>
+      <dt>Selective discipline</dt><dd>Whom a party notices — and whom it quietly ignores — is itself the message; uneven enforcement along caste or faction lines tends to become the real story. <span class="from">— taught by: the Konda Surekha episodes</span></dd>
+      <dt>Ticket (political)</dt><dd>Shorthand for a party&rsquo;s official nomination to contest a seat. Losing the promise of one — as happened to Konda Sushmita in Parkal — is exactly the kind of slight that turns loyal factions into open rebels. <span class="from">— taught by: the Konda Surekha/land-deal row</span></dd>
+      <dt>CLP</dt><dd>The Congress Legislature Party — all the party&rsquo;s sitting MLAs together; skipping its meetings is a deniable, headline-generating way for a senior leader to protest without saying a word. Its office is also where 20+ MLAs staged their revolt against Konda Surekha. <span class="from">— taught by: the Siddaramaiah silences; the Konda Surekha revolt</span></dd>
+      <dt>CWC (Congress Working Committee)</dt><dd>The Congress party&rsquo;s highest decision-making body — like a company board — that sets national strategy and includes the party president, top leaders and Congress chief ministers. <span class="from">— taught by: CM Revanth&rsquo;s CWC remarks</span></dd>
+      <dt>Signalling by absence</dt><dd>Senior leaders rarely attack their own government in words; they attack with empty chairs — deniable, headline-generating, and it forces the leadership to respond. <span class="from">— taught by: the Siddaramaiah silences</span></dd>
+      <dt>Camp politics</dt><dd>Power in big parties flows through factions — count who got into a cabinet and who was left out, and you&rsquo;ve measured each camp&rsquo;s real strength better than any speech. <span class="from">— taught by: the Siddaramaiah silences</span></dd>
+      <dt>Black-badge / well-of-the-House protest</dt><dd>Standard Indian legislative theatre — an Opposition without the numbers to win a vote instead disrupts proceedings with placards, badges and sloganeering to force adjournments and dominate the news cycle. Karnataka&rsquo;s BJP/JD(S) ran this for five straight days over Minister Nagendra. <span class="from">— taught by: the Karnataka Assembly&rsquo;s Nagendra standoff</span></dd>
+      <dt>Lokayukta / ED / CBI vs SIT</dt><dd>Four different investigative bodies can look at the same case and reach different formal conclusions — a state SIT “clean chit” and a central ED/CBI chargesheet can both exist on the same person at once, which is exactly the technical fault-line both sides argue from. <span class="from">— taught by: the Karnataka Assembly&rsquo;s Nagendra standoff</span></dd>
+      <dt>Whip-counting as a power gauge</dt><dd>In any internal party revolt, the number of sitting legislators willing to publicly demand a colleague&rsquo;s sacking is a far more reliable measure of who&rsquo;s actually losing power than any official press statement — 20+ MLAs demanding Konda Surekha&rsquo;s removal is the real signal, not the TPCC&rsquo;s formal notice. <span class="from">— taught by: the Konda Surekha revolt</span></dd>
+      <dt>Deferred discipline</dt><dd>When a party&rsquo;s disciplinary body privately agrees a member erred but avoids issuing a formal ruling, it buys time without spending political capital — watch what the deferral is waiting on (here, the CM&rsquo;s return) to know when a real decision might actually land. <span class="from">— taught by: the TPCC&rsquo;s Konda Surekha deferral</span></dd>
+      <dt>Additional charge as political armor</dt><dd>Giving a minister facing scandal a bigger, not smaller, portfolio is a government&rsquo;s way of publicly signalling it isn&rsquo;t backing down under opposition pressure — the opposite of what a resignation-under-fire would look like. <span class="from">— taught by: Minister Nagendra&rsquo;s additional charge</span></dd>
+      <dt>Litigation-driven legislation</dt><dd>Sometimes a government amends a protective law not for policy reasons but specifically to defuse a court challenge blocking a project it wants built — a pattern worth recognising whenever a legal change conveniently appears right as a related case is pending. <span class="from">— taught by: Karnataka&rsquo;s park-land alienation bill</span></dd>
+    </dl>
+
+    <h3>Delimitation, Water &amp; Infrastructure</h3>
+    <dl>
+      <dt>The 1971 freeze (delimitation)</dt><dd>Lok Sabha seat allocation between states hasn&rsquo;t changed in 50+ years even as populations diverged — a fairness device for population-controlling states, now colliding with one-person-one-vote logic. <span class="from">— taught by: the delimitation saga</span></dd>
+      <dt>Zonal Councils</dt><dd>Statutory forums under the States Reorganisation Act, 1956 where neighbouring states and the Union Home Minister settle shared matters — a formal stage for exactly the kind of regional bloc-building the South is doing on delimitation and funds. <span class="from">— taught by: the delimitation saga</span></dd>
+      <dt>Representation → resources</dt><dd>Parliamentary weight shapes finance-commission politics and which regions&rsquo; infrastructure gets prioritised — the real stakes beneath any seat-count argument. <span class="from">— taught by: the delimitation saga</span></dd>
+      <dt>Cusec</dt><dd>One cubic foot of water per second — roughly 29 crore litres an hour at 12,000 cusecs — the unit every river-sharing dispute gets argued in. <span class="from">— taught by: the Cauvery dispute</span></dd>
+      <dt>CWMA</dt><dd>The Cauvery Water Management Authority — the central body that converts the Supreme Court&rsquo;s sharing formula into monthly release orders, so the fight is now with an institution, not just between two states. <span class="from">— taught by: the Cauvery dispute</span></dd>
+      <dt>Mekedatu</dt><dd>Karnataka&rsquo;s long-proposed reservoir near Kanakapura to store surplus Cauvery water and secure Bengaluru&rsquo;s drinking supply; Tamil Nadu opposes it, making its fate a decade-long flashpoint and a leading indicator for Bengaluru&rsquo;s water security. <span class="from">— taught by: the Cauvery dispute; the Southern Zonal Council</span></dd>
+      <dt>Proposal vs project</dt><dd>Infrastructure moves speech → feasibility study → DPR → funding → tender → construction. Land prices react at every stage, but only construction is certain — file speculative corridor talk, don&rsquo;t chase it. Six deadline extensions on the RRR North tender is this exact lesson playing out in real time. <span class="from">— taught by: Naidu&rsquo;s southern corridor pitch; the Regional Ring Road</span></dd>
+      <dt>Dry port</dt><dd>An inland cargo terminal rail-linked to seaports — it drags export logistics, and warehousing land demand, deep inland. <span class="from">— taught by: Naidu&rsquo;s southern corridor pitch</span></dd>
+    </dl>
+
+  </div>
+</section>
+
+<footer><span>Fresh every morning, 9:00 AM IST</span><span>Hard rule: last 24 hours only</span><span>Sunday: Weekly Digest</span></footer>
+</div>
+
+<div class="overlay" id="m-revanth-return">
+  <div class="sheet">
+    <button class="close" data-close>Close ✕</button>
+    <h2>🎓 Cut short in London — the Centre, a denied US visa clearance, and what a CM can&rsquo;t override</h2>
+    <div class="srcline">Built from: ANI, The South First, Deccan Herald, The Hans India &middot; 23 Aug 2026</div>
+    <div class="dsec"><h3>📖 The story so far</h3>
+      <p>CM A. Revanth Reddy&rsquo;s 10-day &ldquo;Telangana Rising&rdquo; UK&ndash;US tour began around 20 August, meant to pitch Hyderabad to top universities and investors. Days earlier he had called a uniform Lok Sabha delimitation &ldquo;anti-South India&rdquo; at the Congress Working Committee. On 21 August, the Ministry of External Affairs (MEA) cleared only the UK leg and denied political clearance for the US leg. During the London days the delegation met Cambridge, Oxford and University of London academics — the Oxford meeting itself became a separate BJP &ldquo;anti-national&rdquo; row (covered in earlier editions), and BRS alleged a &ldquo;Swachh Bio&rdquo; MoU tied to the CM&rsquo;s brother.</p>
+    </div>
+    <div class="dsec"><h3>⚡ What happened now</h3>
+      <p>On 23 August, rather than fly on to Boston, Revanth returned to Hyderabad from London. He said the US denial was for &ldquo;political reasons&rdquo; and that he would explain fully at a press conference on home soil; the MEA&rsquo;s stated ground was that the &ldquo;planned programme&rdquo; was &ldquo;not appropriate to the office held.&rdquo; He thanked AICC president Mallikarjun Kharge for backing him &ldquo;in the national interest.&rdquo; In a workaround, he directed the official delegation to continue to the US without him and sign the planned MoUs with Harvard, MIT, Northeastern and Virginia Tech. Reports separately noted the row over whether proposed (but MEA-unlisted) meetings with US Vice President J.D. Vance and NYC Mayor Zohran Mamdani were the real trigger — the Telangana CMO disputed that either was actually scheduled.</p>
+    </div>
+    <div class="dsec"><h3>🔮 What happens next</h3>
+      <div class="watch"><b>Watch:</b> Revanth&rsquo;s promised Hyderabad press conference and exactly how he frames the denial; whether the delegation actually signs the US MoUs without him; whether — now that he&rsquo;s back — he moves on the pending Konda Surekha Cabinet question; any escalation of the &ldquo;Swachh Bio&rdquo; or Vance/Mamdani sub-rows.</div>
+    </div>
+    <div class="dsec"><h3>👤 Who&rsquo;s who</h3>
+      <div class="who-item"><b>A. Revanth Reddy</b> — Telangana Chief Minister, Congress, whose US leg was blocked.</div>
+      <div class="who-item"><b>Ministry of External Affairs (MEA)</b> — Government of India body that must clear a CM&rsquo;s foreign travel; denied the US leg.</div>
+      <div class="who-item"><b>Mallikarjun Kharge</b> — AICC (Congress) national president, whom Revanth thanked for support.</div>
+      <div class="who-item"><b>J.D. Vance</b> — US Vice President; <b>Zohran Mamdani</b> — NYC Mayor — both named in the disputed &ldquo;unlisted meetings&rdquo; sub-row.</div>
+    </div>
+    <div class="dsec"><h3>🧠 Learn the concepts (from zero)</h3>
+      <div class="concept"><b class="term">Political clearance for foreign travel.</b> A Chief Minister is a state functionary, but foreign relations are a purely central subject. So before a CM travels abroad in an official capacity, the MEA must clear both the trip and its itinerary — and it can approve one country and deny another on the same tour. The state has no legal power to override that denial; it can only protest politically. This is federalism&rsquo;s hard edge: money and land are state subjects, but the passport-stamp of officialdom is the Centre&rsquo;s.</div>
+      <div class="concept"><b class="term">&ldquo;Not appropriate to the office held.&rdquo;</b> The MEA&rsquo;s stated reason is bureaucratic code — it means the proposed meetings or programme were judged to exceed what a state CM (as opposed to a Union minister) should be doing abroad. Whether that&rsquo;s a genuine protocol call or a political one is exactly what the two sides are fighting over.</div>
+      <div class="concept"><b class="term">Sending the delegation on without the principal.</b> A neat institutional trick: the clearance denial attaches to the person (the CM), not necessarily to the officials. So the MoUs can still be signed by the accompanying bureaucrats — letting the government claim the substance happened even if the headline visit didn&rsquo;t.</div>
+    </div>
+    <div class="dsec"><h3>🎯 IAS Pointer</h3>
+      <p>Centre-state relations and the Union&rsquo;s exclusive authority over foreign affairs (GS2 — polity, federalism); protocol and political clearance for constitutional functionaries&rsquo; foreign travel; the distinction between a state&rsquo;s economic-diplomacy ambitions and the Centre&rsquo;s gatekeeping of official foreign engagement.</p>
+    </div>
+    <div class="dsec"><h3>⭐ Make-me-a-pro</h3>
+      <div class="pro"><p>A Chief Minister sets out to sell his state to the world, gets halfway, and is told by his own national government that he can&rsquo;t finish the trip. He can&rsquo;t appeal it, can&rsquo;t override it, can&rsquo;t sue his way past it — all he can do is come home and hold a press conference. That&rsquo;s the whole lesson in one image: in India&rsquo;s federal design, a state controls its land and its budget, but the moment officialdom crosses a border it&rsquo;s the Centre&rsquo;s call, full stop. For a developer, the transferable instinct isn&rsquo;t about diplomacy — it&rsquo;s about knowing exactly where a given approval actually lives. A CM can&rsquo;t override the MEA; a Collector can&rsquo;t override a High Court stay; a sub-registrar can&rsquo;t override a 22A listing. Before you count on any promise or clearance, ask the same question this episode answers so cleanly: whose signature is the real one, and can the person promising you actually give it?</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-harish-22a">
+  <div class="sheet">
+    <button class="close" data-close>Close ✕</button>
+    <h2>🎓 How a fully-registered home ends up frozen — the 22A fight reaches the Assembly floor</h2>
+    <div class="srcline">Built from: Deccan Chronicle, Telangana Today, The Hans India &middot; 23 Aug 2026</div>
+    <div class="dsec"><h3>📖 The story so far</h3>
+      <p>Section 22A of the Registration Act lets the government maintain a &ldquo;prohibited list&rdquo; of survey numbers that sub-registrars must refuse to register — legitimately for government, endowment, wakf and ceiling-surplus land. Since a botched migration from the old Dharani portal to the new Bhu Bharati system, thousands of clean, private, patta properties have been wrongly swept onto that list, freezing owners out of selling or mortgaging. BRS has spent weeks turning this into its lead attack line: T. Harish Rao demanded Revenue Minister Ponguleti Srinivas Reddy&rsquo;s resignation and a forensic audit of every 22A change since December 2023, and BRS opened a free legal cell for affected owners.</p>
+    </div>
+    <div class="dsec"><h3>⚡ What happened now</h3>
+      <p>At a 23 August BRS meeting in Boduppal supporting affected residents, Harish Rao escalated to a concrete threat: BRS would stall the coming Assembly session and gherao (lay siege to) the Secretariat if the Congress government does not withdraw the unjust listings. He named three specific colonies he wants struck off the 22A list — <b>Tirumala Meadows, Lakshmi Ganapathi and Hemanagar</b> — alleging that fully registered houses were being placed under the freeze to enable illegal collections, and that middle-class families in those colonies could no longer get bank loans or sell their homes.</p>
+    </div>
+    <div class="dsec"><h3>🔮 What happens next</h3>
+      <div class="watch"><b>Watch:</b> whether BRS actually disrupts the Assembly session when it convenes; whether the government de-notifies any of the three named colonies; whether Revenue Minister Ponguleti responds now that the CM is back in Hyderabad; any move on the forensic-audit demand — that audit, if it ever happens, would make de-notification history public, the single best diligence tool a buyer could ask for.</div>
+    </div>
+    <div class="dsec"><h3>👤 Who&rsquo;s who</h3>
+      <div class="who-item"><b>T. Harish Rao</b> — BRS deputy floor leader, Siddipet MLA, leading the 22A attack.</div>
+      <div class="who-item"><b>Ponguleti Srinivas Reddy</b> — Telangana Revenue Minister, Congress, whose department maintains the 22A list.</div>
+      <div class="who-item"><b>Tirumala Meadows / Lakshmi Ganapathi / Hemanagar</b> — the three Boduppal-side colonies named as wrongly frozen.</div>
+    </div>
+    <div class="dsec"><h3>🧠 Learn the concepts (from zero)</h3>
+      <div class="concept"><b class="term">Colony-level over-listing.</b> There&rsquo;s a big difference between one stray survey number getting frozen and an entire registered colony being added to the 22A list in a batch. The second is what Harish Rao is attacking — hundreds of clean patta homes frozen at once. It usually happens when a whole survey-number block, or a mis-mapped parcel that a colony was carved out of, gets flagged, and the error cascades to every plot inside. That&rsquo;s why he can name whole colonies, not just individual plots.</div>
+      <div class="concept"><b class="term">Why a freeze hits the loan first.</b> When a property lands on the 22A list, the sale deed you already hold doesn&rsquo;t vanish — but you can&rsquo;t register a fresh transaction on it, and a bank won&rsquo;t lend against a title it can&rsquo;t safely take as security. So the practical damage shows up as: no resale, no mortgage, no loan-against-property. The asset is still &ldquo;yours&rdquo; but economically it&rsquo;s locked in a glass case.</div>
+      <div class="concept"><b class="term">Registration Act vs the land record.</b> Two separate systems have to agree: the Registration department (which records transactions and holds the 22A list) and the revenue land record (Bhu Bharati, which says who owns what). The 22A crisis is fundamentally a disagreement between these two systems after a data migration — which is why fixing it needs the revenue side to correct records <i>and</i> the registration side to de-notify.</div>
+    </div>
+    <div class="dsec"><h3>🎯 IAS Pointer</h3>
+      <p>Section 22A of the Registration Act, 1908 and state amendments (GS2 — governance); land-records digitisation and its failure modes (Dharani/Bhu Bharati) (GS2/GS3); the use of legislative disruption and extra-parliamentary protest (gherao) as opposition tools; property rights and the citizen-vs-state records dispute.</p>
+    </div>
+    <div class="dsec"><h3>⭐ Make-me-a-pro</h3>
+      <div class="pro"><p>Picture a family in Tirumala Meadows who did everything right: bought a plot, registered the sale deed, paid stamp duty, built a house, lived there ten years. Then one morning a data-migration error drops their whole colony onto a government &ldquo;prohibited&rdquo; list — and just like that, they can&rsquo;t sell, can&rsquo;t take a loan, can&rsquo;t do anything but wait for a bureaucrat to fix a spreadsheet. That&rsquo;s the nightmare a plotting developer has to design around, because it can hit a deal at the worst possible moment: mid-JD, mid-sale, mid-loan. The practical takeaway is a hard rule — a registered document proves a transaction <i>happened</i>, but it does not prove the property is currently <i>transactable</i>. Those are two different questions. Before you commit rupees or a JD signature to any Hyderabad plot, you pull the live 22A status on the exact survey number, that week, yourself. &ldquo;It&rsquo;s registered, sir&rdquo; is where a beginner stops and where a pro just starts checking.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-surekha-kharge">
+  <div class="sheet">
+    <button class="close" data-close>Close ✕</button>
+    <h2>🎓 A 15-minute meeting and a message — Konda Surekha goes to the high command</h2>
+    <div class="srcline">Built from: The Hans India, NTV Telugu &middot; 23 Aug 2026</div>
+    <div class="dsec"><h3>📖 The story so far</h3>
+      <p>Konda Surekha, Telangana&rsquo;s Endowments &amp; Forest Minister, has been at the centre of a Congress internal storm since her daughter Konda Sushmita — denied the Parkal Assembly ticket — publicly attacked CM Revanth Reddy and revived a ₹200-crore-vs-₹7-crore Raviryal land-allotment allegation against the CM&rsquo;s family. The TPCC Disciplinary Committee found Sushmita had &ldquo;crossed the limits&rdquo; and that Surekha was at fault for not condemning her, but deferred any formal ruling. Meanwhile 20+ Congress MLAs publicly demanded Surekha&rsquo;s sacking.</p>
+    </div>
+    <div class="dsec"><h3>⚡ What happened now</h3>
+      <p>On 23 August, Surekha travelled to Bengaluru and met AICC president Mallikarjun Kharge — reportedly for about 15 minutes — to put her side of the rift directly to the high command. She maintained that neither she nor her daughter had criticised the Congress party or the Gandhi family and alleged a political conspiracy targeting her family. Kharge reportedly expressed displeasure at her conduct, cautioned her against statements that hurt party interests, and advised her to resolve the matter with the state unit (TPCC) rather than escalate it upward. Reports added that CM Revanth Reddy, now back in Hyderabad, is expected to take up her case with state leaders — meaning no final Cabinet decision has yet been reported.</p>
+    </div>
+    <div class="dsec"><h3>🔮 What happens next</h3>
+      <div class="watch"><b>Watch:</b> whether Revanth acts on the Surekha question soon after his return; whether the TPCC committee reconvenes with a formal ruling; any reshuffle touching the Endowments &amp; Forest portfolio; whether the underlying ₹200-crore Raviryal land allegation ever gets a formal probe rather than staying buried under the family feud.</div>
+    </div>
+    <div class="dsec"><h3>👤 Who&rsquo;s who</h3>
+      <div class="who-item"><b>Konda Surekha</b> — Telangana Endowments &amp; Forest Minister, Congress, under internal disciplinary scrutiny.</div>
+      <div class="who-item"><b>Konda Sushmita</b> — her daughter, whose remarks against the CM triggered the row.</div>
+      <div class="who-item"><b>Mallikarjun Kharge</b> — AICC (Congress) national president, the high command she appealed to.</div>
+      <div class="who-item"><b>A. Revanth Reddy</b> — Chief Minister, now back in Hyderabad, expected to weigh in.</div>
+    </div>
+    <div class="dsec"><h3>🧠 Learn the concepts (from zero)</h3>
+      <div class="concept"><b class="term">Going over the state unit&rsquo;s head.</b> In a national party, a state leader in trouble has two forums: the state party (TPCC) and the national high command. Appealing directly to the high command is a way of trying to bypass local rivals. But the high command usually doesn&rsquo;t want to spend its own political capital on a state faction fight — so the standard response is to bounce it back down: &ldquo;settle it with your state unit.&rdquo; That bounce-back is itself the verdict — it means the centre isn&rsquo;t willing to protect you.</div>
+      <div class="concept"><b class="term">Endowments &amp; Forest — why the portfolio matters to land.</b> These two departments control some of the most legally sensitive land in the state: temple/endowment land (which generally can&rsquo;t be freely sold) and forest land (protected under central and state law). A minister here sits on top of exactly the boundary categories a developer must never accidentally cross. So a reshuffle of this portfolio isn&rsquo;t just palace politics — it changes who administers land that abuts many peri-urban JD sites.</div>
+    </div>
+    <div class="dsec"><h3>🎯 IAS Pointer</h3>
+      <p>Intra-party discipline and the state-unit vs high-command relationship (GS2 — polity/parties); the constitutional reality that only the CM (via the Governor) can drop a minister, not a party committee; endowment and forest land administration as a governance subject.</p>
+    </div>
+    <div class="dsec"><h3>⭐ Make-me-a-pro</h3>
+      <div class="pro"><p>A minister under fire flies to another city, gets fifteen minutes with the party&rsquo;s national boss, and comes away with a polite instruction to go home and sort it out with the very state leaders she was trying to go around. Read that correctly and you&rsquo;ve learned something about how power actually flows: the high command didn&rsquo;t rescue her, and &ldquo;go settle it locally&rdquo; is what a centre says when it has quietly decided you&rsquo;re not worth a fight. For a developer, the portfolio is the part to file away — Endowments and Forest are two of the land categories that can silently sink a deal, because temple land often can&rsquo;t be sold at all and forest boundaries are drawn by a law you can&rsquo;t argue with. Whoever ends up running that department is worth knowing, and any parcel near an endowment or forest edge is worth double-checking, no matter how clean the sale deed looks.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-ktr-1000">
+  <div class="sheet">
+    <button class="close" data-close>Close ✕</button>
+    <h2>🎓 A 1,000-day scorecard — BRS builds a campaign around a calendar date</h2>
+    <div class="srcline">Built from: ANI, Siasat &middot; 24 Aug 2026</div>
+    <div class="dsec"><h3>📖 The story so far</h3>
+      <p>The Congress government led by CM Revanth Reddy came to power in Telangana in December 2023 on a platform of &ldquo;six guarantees&rdquo; and a long list of election promises. BRS, now the opposition, has spent 2026 hammering the theme that those guarantees are unfulfilled — from farm loan waivers to welfare payments to housing — while also running its parallel attacks on Section 22A and alleged corruption. BRS Working President K.T. Rama Rao (KTR) has been the sharpest voice in that campaign.</p>
+    </div>
+    <div class="dsec"><h3>⚡ What happened now</h3>
+      <p>On 24 August, KTR announced a statewide week-long BRS campaign starting <b>2 September</b>, deliberately timed to the Congress government completing <b>1,000 days</b> in office. He said Congress had made 420 promises, 13 declarations and six guarantees, all claimed to be implementable within 100 days, but had &ldquo;not fully fulfilled even a single promise&rdquo; after 1,000 days. He directed BRS cadres across the state to distribute &ldquo;Baaki Cards&rdquo; (&ldquo;pending-dues cards&rdquo;) that list the specific unfulfilled welfare commitments to each social group, and called for the full party organisation to unite behind the drive.</p>
+    </div>
+    <div class="dsec"><h3>🔮 What happens next</h3>
+      <div class="watch"><b>Watch:</b> whether the campaign actually launches on 2 September and how the government counters it; which specific promises BRS foregrounds (land, housing and welfare ones tend to lead); whether the government rushes any land- or housing-scheme announcements to blunt the &ldquo;1,000 days, nothing delivered&rdquo; framing.</div>
+    </div>
+    <div class="dsec"><h3>👤 Who&rsquo;s who</h3>
+      <div class="who-item"><b>K.T. Rama Rao (KTR)</b> — BRS Working President, son of former CM K. Chandrashekar Rao, leading the campaign.</div>
+      <div class="who-item"><b>BRS (Bharat Rashtra Samithi)</b> — the principal Telangana opposition party.</div>
+      <div class="who-item"><b>Congress / Revanth Reddy government</b> — the target, completing 1,000 days on ~2 September.</div>
+    </div>
+    <div class="dsec"><h3>🧠 Learn the concepts (from zero)</h3>
+      <div class="concept"><b class="term">Milestone / anniversary campaigning.</b> Oppositions love round-number dates — 100 days, one year, 1,000 days — because the date is a free, self-explaining headline. It forces the media and the public into a &ldquo;promised vs delivered&rdquo; scorecard on the opposition&rsquo;s terms. Nothing new has to happen; the calendar does the work. The counter-move for a government is to schedule visible &ldquo;deliveries&rdquo; right before the date so it has something to show.</div>
+      <div class="concept"><b class="term">Why this matters for land and housing.</b> When an opposition builds a &ldquo;you didn&rsquo;t deliver&rdquo; campaign, the promises that get pushed hardest are the tangible, countable ones — houses built, plots regularised, compensation paid. So an anniversary campaign is a useful early-warning signal for a developer: it tells you which schemes the government will feel most pressure to be <i>seen</i> delivering in the following weeks, which is often when regularisation windows, layout approvals or 2BHK allotments get a sudden push.</div>
+    </div>
+    <div class="dsec"><h3>🎯 IAS Pointer</h3>
+      <p>Electoral accountability and promise-tracking as a political mechanism (GS2 — polity); welfare-guarantee politics in Indian states; opposition mobilisation strategies and the media cycle; the tension between populist guarantees and fiscal capacity.</p>
+    </div>
+    <div class="dsec"><h3>⭐ Make-me-a-pro</h3>
+      <div class="pro"><p>A party doesn&rsquo;t need a scandal to launch an offensive — sometimes it just needs a calendar. BRS looked at the date the Congress government would hit 1,000 days, and built a week-long campaign around it, because &ldquo;1,000 days and not one promise fully kept&rdquo; writes its own headline. That&rsquo;s the craft: manufacture a scorecard moment and make the government defend itself on your chosen metric. For a plotting developer, this is quietly useful intelligence rather than mere noise. When you see an opposition sharpening a &ldquo;you didn&rsquo;t deliver&rdquo; drive around a milestone, expect the government to answer with visible action on the countable promises — housing, plot regularisation, compensation — in the weeks that follow. Those are precisely the windows where a stalled LRS scheme suddenly reopens or a pending layout approval suddenly moves. Read the political calendar and you can sometimes see the administrative calendar coming.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-nagendra-siege">
+  <div class="sheet">
+    <button class="close" data-close>Close ✕</button>
+    <h2>🎓 A siege announced — the Valmiki Corporation scam and a minister who won&rsquo;t go</h2>
+    <div class="srcline">Built from: ANI, Siasat, Deccan Chronicle, The Hans India &middot; 23 Aug 2026 (siege scheduled 9:30 AM, 24 Aug)</div>
+    <div class="dsec"><h3>📖 The story so far</h3>
+      <p>B. Nagendra is Karnataka&rsquo;s Planning &amp; Statistics Minister. He first resigned from the Siddaramaiah Cabinet in June 2024 over the Karnataka Maharshi Valmiki Scheduled Tribes Development Corporation (KMVSTDCL) embezzlement scandal, in which funds meant for tribal welfare were allegedly siphoned out of the corporation&rsquo;s bank accounts. Despite that, he was reinducted into the D.K. Shivakumar-led Cabinet on 3 August 2026, and last week the government handed him an <i>additional</i> charge — the Kalyana Karnataka Region Development Secretariat — rather than remove him, prompting five straight days of BJP/JD(S) Assembly disruption.</p>
+    </div>
+    <div class="dsec"><h3>⚡ What happened now</h3>
+      <p>On 23 August, Karnataka Leader of the Opposition R. Ashoka announced that the BJP, with ally JD(S), would march from Freedom Park and lay siege to Vidhana Soudha at <b>9:30 AM on Monday, 24 August</b>, demanding Nagendra&rsquo;s removal. Ashoka said an initial <b>₹89 crore</b> was illegally transferred out of the corporation&rsquo;s Union Bank account, with the overall alleged diversion later pegged at about <b>₹187 crore</b> — money he claimed helped fund Congress election campaigns. He said JD(S) chief H.D. Kumaraswamy backed continuing the agitation for another week, that BJP state president B.Y. Vijayendra would join the march, and that the BJP had compiled details of 35 cases against Nagendra spanning mining and the Valmiki Corporation. (The siege itself was scheduled after this edition&rsquo;s press time — reported here as announced, not as a completed event.)</p>
+    </div>
+    <div class="dsec"><h3>🔮 What happens next</h3>
+      <div class="watch"><b>Watch:</b> whether the 9:30 AM siege actually goes ahead and its outcome (turnout, detentions, police response); whether the government makes any concession or Nagendra responds; whether the Assembly (in session) sees fresh disruption; any Lokayukta/ED/CBI procedural step on the underlying cases.</div>
+    </div>
+    <div class="dsec"><h3>👤 Who&rsquo;s who</h3>
+      <div class="who-item"><b>R. Ashoka</b> — Leader of the Opposition, Karnataka Assembly, BJP; announced the siege.</div>
+      <div class="who-item"><b>B. Nagendra</b> — Planning &amp; Statistics Minister, Congress, target of the resignation demand.</div>
+      <div class="who-item"><b>H.D. Kumaraswamy</b> — Union Minister, JD(S) state president, backing the agitation.</div>
+      <div class="who-item"><b>B.Y. Vijayendra</b> — Karnataka BJP state president, joining the march.</div>
+      <div class="who-item"><b>D.K. Shivakumar</b> — Karnataka Chief Minister (Deputy CM leading the government), who reinducted and re-empowered Nagendra.</div>
+      <div class="who-item"><b>KMVSTDCL (Valmiki Corporation)</b> — the ST welfare corporation whose funds were allegedly diverted.</div>
+    </div>
+    <div class="dsec"><h3>🧠 Learn the concepts (from zero)</h3>
+      <div class="concept"><b class="term">Welfare-corporation scam.</b> State governments run development corporations for disadvantaged groups (here, Scheduled Tribes). These hold budgeted welfare money in bank accounts. The classic fraud is simple in shape: money is transferred out of the corporation&rsquo;s official account into a chain of shell or personal accounts and then recycled — ₹89 crore moved out here, an overall ~₹187 crore diversion alleged. The vulnerability is structural: a large pot of money, weak day-to-day oversight, and a single minister-in-charge who effectively controls the taps.</div>
+      <div class="concept"><b class="term">Gherao / laying siege.</b> A protest form where demonstrators physically surround and blockade a government building to force attention — distinct from disrupting proceedings inside the House. It&rsquo;s deliberately visual and disruptive, designed to own the news cycle. Note that in the same 24 hours, Telangana&rsquo;s Harish Rao threatened a Secretariat gherao over 22A and Karnataka&rsquo;s BJP-JD(S) planned a Vidhana Soudha siege — the same tool, two states.</div>
+      <div class="concept"><b class="term">Why he keeps the job.</b> A government facing a resignation demand has three options: remove the minister (concedes the opposition&rsquo;s case), do nothing, or — as here — give him <i>more</i>. Expanding a scandal-hit minister&rsquo;s role is a deliberate signal of defiance; it tells you the party has calculated he&rsquo;s worth more inside the tent than the political cost of protecting him. That math usually reflects caste arithmetic, faction loyalty or the danger of what he could say if pushed out.</div>
+    </div>
+    <div class="dsec"><h3>🎯 IAS Pointer</h3>
+      <p>Public-fund embezzlement and the oversight architecture of welfare corporations (GS2 — governance, transparency); the roles of Lokayukta, ED, CBI and SIT in a single case (GS2); extra-parliamentary protest (gherao) and Cabinet portfolio allocation as political tools; Scheduled Tribe welfare finance.</p>
+    </div>
+    <div class="dsec"><h3>⭐ Make-me-a-pro</h3>
+      <div class="pro"><p>The opposition spends five days disrupting the Assembly, then announces it will physically surround the state&rsquo;s seat of power to force a minister out — and the government&rsquo;s answer, days earlier, was to hand that same minister a second portfolio. Watch what a government <i>does</i> under maximum pressure, not what it says, and you can read where power really sits: a party that digs in this hard has decided the minister is load-bearing. For a developer the takeaway isn&rsquo;t about Nagendra — it&rsquo;s about the shape of the vulnerability. A large pool of discretionary public money plus a single controlling official plus weak oversight is the exact recipe that produces both welfare-corporation scams and land-allotment rackets. Whenever you see that combination near a deal — a development authority sitting on a land bank, a corporation dispensing compensation, an official with sole sign-off — treat it as a risk to price in, because the same structure that let ₹187 crore go missing is the structure that decides which plots get allotted to whom.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-vijayendra-parks">
+  <div class="sheet">
+    <button class="close" data-close>Close ✕</button>
+    <h2>🎓 &ldquo;A systematic conspiracy&rdquo; — the opposition fights the park-land bill through its stages</h2>
+    <div class="srcline">Built from: The Federal, ANI wire (syndicated) &middot; 23 Aug 2026</div>
+    <div class="dsec"><h3>📖 The story so far</h3>
+      <p>Karnataka&rsquo;s parks and gardens — including Cubbon Park and Lalbagh in Bengaluru — have been protected since 1975 under the Karnataka Government Parks (Preservation) Act. On 21&ndash;22 August, the state Cabinet cleared a Bill amending that Act to let up to 5% of any government park or garden be &ldquo;alienated&rdquo; — sold, leased, gifted, exchanged or mortgaged — for public infrastructure. Critics immediately tied it to the roughly ₹17,770-crore Hebbal&ndash;Silk Board tunnel road (reportedly needing about six acres of Lalbagh temporarily and one acre permanently), which is facing a court challenge on Parks Act grounds. BJP MP Tejasvi Surya had already called the move &ldquo;foolish,&rdquo; saying &ldquo;parks are not real-estate assets.&rdquo;</p>
+    </div>
+    <div class="dsec"><h3>⚡ What happened now</h3>
+      <p>On 23 August, Karnataka BJP president B.Y. Vijayendra said the party would &ldquo;make every possible effort to prevent&rdquo; the bill, calling it &ldquo;a systematic conspiracy to take over government parks reserved for environmental protection, public health safeguards and other public uses.&rdquo; His intervention moves the fight from Tejasvi Surya&rsquo;s individual criticism to the formal position of the state party organisation — signalling the BJP will try to block or slow the bill at every legislative stage, not just in press statements.</p>
+    </div>
+    <div class="dsec"><h3>🔮 What happens next</h3>
+      <div class="watch"><b>Watch:</b> whether the Bill is tabled and passed in the Legislative Assembly and Council (Cabinet clearance is only the first step); the Governor&rsquo;s assent and formal notification; whether Cubbon Park or Lalbagh land is specifically proposed for the tunnel road; the outcome of the pending court challenge to the tunnel project itself.</div>
+    </div>
+    <div class="dsec"><h3>👤 Who&rsquo;s who</h3>
+      <div class="who-item"><b>B.Y. Vijayendra</b> — Karnataka BJP state president, now formally opposing the bill.</div>
+      <div class="who-item"><b>Tejasvi Surya</b> — Bengaluru South BJP MP, earlier lead critic.</div>
+      <div class="who-item"><b>Karnataka Cabinet</b> — under CM D.K. Shivakumar&rsquo;s government, which cleared the bill.</div>
+    </div>
+    <div class="dsec"><h3>🧠 Learn the concepts (from zero)</h3>
+      <div class="concept"><b class="term">Cabinet clearance vs law — the stages.</b> A bill &ldquo;cleared by Cabinet&rdquo; is only a government <i>proposal</i>. Before it has legal force it must be tabled and passed in the Legislative Assembly, then (in Karnataka&rsquo;s bicameral setup) the Legislative Council, then receive the Governor&rsquo;s assent, then be formally notified in the gazette. Each stage is a place the process can be delayed, amended or challenged. An organised opposition targets the stages, not just the headline.</div>
+      <div class="concept"><b class="term">Alienation of protected land, revisited.</b> &ldquo;Alienation&rdquo; is the legal transfer of land out of a protected category — by sale, lease, gift, exchange or mortgage. It&rsquo;s a formal mechanism, which is exactly why a specific enabling law is needed: without amending the 1975 Act, the government legally <i>cannot</i> touch park land, no matter how badly a project needs it. That&rsquo;s the whole reason this bill exists.</div>
+      <div class="concept"><b class="term">Organisational vs individual opposition.</b> When a lone MP criticises a bill, it&rsquo;s a talking point. When the state party president declares formal opposition, it becomes an organisational commitment — party MLAs will move amendments, force debates, and potentially litigate. The escalation from Surya&rsquo;s tweet-level criticism to Vijayendra&rsquo;s &ldquo;every possible effort&rdquo; is the story: the party machine is now engaged.</div>
+    </div>
+    <div class="dsec"><h3>🎯 IAS Pointer</h3>
+      <p>The legislative process from Cabinet clearance to gazette notification in a bicameral state (GS2 — polity); environmental/green-space protection law vs infrastructure development (GS3); judicial review of infrastructure projects; the concept of alienation of public/protected land.</p>
+    </div>
+    <div class="dsec"><h3>⭐ Make-me-a-pro</h3>
+      <div class="pro"><p>Yesterday the lesson was that a government can rewrite a 50-year-old protection to unblock a project; today&rsquo;s lesson is the other half — that rewriting isn&rsquo;t one act, it&rsquo;s a gauntlet. &ldquo;Cabinet cleared&rdquo; sounds final, but between that and a law with teeth lie the Assembly, the Council, the Governor and the gazette, and an organised opposition can jam the machinery at any one of them. The moment the state party president says &ldquo;every possible effort,&rdquo; the fight stops being a press war and becomes a procedural one. For a developer, this is the discipline to internalise about <i>any</i> land-law change that affects you — a carve-out, a zoning tweak, a regularisation window: never treat it as real until it&rsquo;s notified. A bill can die in committee, get amended past recognition, or sit un-assented for months. Track the stage it&rsquo;s actually at, not the headline it made when the Cabinet waved it through.</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var edKey = (document.querySelector('.masthead .date')||{}).textContent || 'ed';
+  edKey = 'ddl-' + edKey.replace(/[^0-9A-Za-z]+/g,'').slice(0,30);
+  function store(k){ try{ return JSON.parse(localStorage.getItem(k)||'{}'); }catch(e){ return {}; } }
+  function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  var readState = store(edKey+'-read'), starState = store(edKey+'-star');
+
+  /* ---- app bar ---- */
+  var masthead = document.querySelector('header.masthead');
+  var zones = Array.prototype.slice.call(document.querySelectorAll('section.zone'));
+  var labels = ['TG · Estate','TG · Politics','BLR · Estate','KA · Politics','Library'];
+  var bar = document.createElement('div'); bar.className='appbar';
+  var chipsHtml = '<button class="chip active" data-tab="all">All</button>';
+  zones.forEach(function(z,i){ chipsHtml += '<button class="chip" data-tab="'+i+'">'+(labels[i]||('Section '+(i+1)))+'</button>'; });
+  chipsHtml += '<button class="chip" data-tab="saved">★ Saved</button>';
+  bar.innerHTML = '<div class="appbar-row"><div class="chips">'+chipsHtml+'</div>'
+    + '<button class="icon-btn fs" id="btn-fminus" title="Smaller text" aria-label="Smaller text">A−</button><button class="icon-btn fs" id="btn-fplus" title="Larger text" aria-label="Larger text">A+</button><button class="icon-btn" id="btn-search" title="Search" aria-label="Search">⌕</button>'
+    + '<button class="icon-btn" id="btn-theme" title="Theme" aria-label="Theme">◐</button></div>'
+    + '<div class="searchrow" id="searchrow"><input id="searchbox" type="search" placeholder="Search today&rsquo;s stories…" aria-label="Search stories"></div>'
+    + '<div class="progressbar"><span id="pcount"></span><div class="ptrack"><div class="pfill" id="pfill"></div></div><span id="psaved"></span></div>';
+  masthead.parentNode.insertBefore(bar, masthead.nextSibling);
+  var emptyMsg = document.createElement('div'); emptyMsg.className='empty-msg';
+  emptyMsg.textContent='Nothing here — star some stories, or clear the search.';
+  bar.parentNode.insertBefore(emptyMsg, bar.nextSibling);
+
+  /* ---- add-to-home-screen tip (phones, once) ---- */
+  var dismissed=false; try{ dismissed=!!localStorage.getItem('ddl-a2hs'); }catch(e){}
+  if(!dismissed && window.matchMedia && matchMedia('(max-width:700px)').matches){
+    var isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent||'');
+    var tip=document.createElement('div'); tip.className='install-tip';
+    tip.innerHTML='📲 <b>Put this on your home screen:</b> '+(isIOS?'tap Share <span style="opacity:.7">(the box-with-arrow)</span> → <b>Add to Home Screen</b>':'tap <b>⋮</b> → <b>Add to Home screen</b>')+' — it opens like an app. <button id="a2hs-x" aria-label="Dismiss">✕</button>';
+    bar.parentNode.insertBefore(tip, bar.nextSibling);
+    tip.querySelector('#a2hs-x').addEventListener('click', function(){ tip.remove(); try{ localStorage.setItem('ddl-a2hs','1'); }catch(e){} });
+  }
+
+  /* ---- stars + read marks on cards ---- */
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card[data-deep]'));
+  cards.forEach(function(c){
+    var id = c.getAttribute('data-deep');
+    var st = document.createElement('button'); st.className='star'; st.innerHTML='★';
+    st.title='Save story'; st.setAttribute('aria-label','Save story');
+    if(starState[id]) st.classList.add('on');
+    st.addEventListener('click', function(e){ e.stopPropagation();
+      starState[id]=!starState[id]; if(!starState[id]) delete starState[id];
+      st.classList.toggle('on'); save(edKey+'-star', starState); refresh(); });
+    c.appendChild(st);
+    if(readState[id]) addReadMark(c);
+  });
+  function addReadMark(c){
+    if(c.querySelector('.readmark')) return;
+    var h=c.querySelector('h2'); if(h){ var m=document.createElement('span'); m.className='readmark'; m.textContent='✓ READ'; h.appendChild(m); }
+  }
+
+  /* ---- lesson order + modal logic (history-aware) ---- */
+  var order=[]; cards.forEach(function(c){ var id=c.getAttribute('data-deep'); if(order.indexOf(id)<0) order.push(id); });
+  var pushed=false;
+  function titleFor(id){ var c=document.querySelector('.card[data-deep="'+id+'"] h2'); return c? c.childNodes[0].textContent.slice(0,30)+'…':''; }
+  function openM(id){
+    var m=document.getElementById(id); if(!m) return;
+    document.querySelectorAll('.overlay.open').forEach(function(o){o.classList.remove('open');});
+    m.classList.add('open'); document.body.style.overflow='hidden'; m.scrollTop=0;
+    if(!pushed){ try{ history.pushState({ddl:1},''); pushed=true; }catch(e){} }
+    readState[id]=true; save(edKey+'-read', readState);
+    document.querySelectorAll('.card[data-deep="'+id+'"]').forEach(addReadMark); progress();
+    var sheet=m.querySelector('.sheet');
+    var nav=sheet.querySelector('.lessonnav');
+    if(!nav){ nav=document.createElement('div'); nav.className='lessonnav'; sheet.appendChild(nav); }
+    var i=order.indexOf(id), p=order[i-1], n=order[i+1];
+    nav.innerHTML = '<button '+(p?'':'disabled')+' data-go="'+(p||'')+'">‹ '+(p?titleFor(p):'First story')+'</button>'
+                  + '<button '+(n?'':'disabled')+' data-go="'+(n||'')+'" style="text-align:right">'+(n?titleFor(n):'Last story')+' ›</button>';
+    nav.querySelectorAll('button[data-go]').forEach(function(b){ b.addEventListener('click', function(){ if(b.getAttribute('data-go')) openM(b.getAttribute('data-go')); }); });
+  }
+  function closeRaw(){ document.querySelectorAll('.overlay.open').forEach(function(m){m.classList.remove('open');}); document.body.style.overflow=''; }
+  function closeAll(){ if(pushed){ try{ history.back(); return; }catch(e){} } closeRaw(); }
+  window.addEventListener('popstate', function(){ pushed=false; closeRaw(); });
+
+  /* card interactions: single tap/click opens; links and stars still work */
+  cards.forEach(function(c){
+    c.addEventListener('click', function(e){
+      if(e.target.closest('a') || e.target.closest('.star') || e.target.closest('.deep-btn')) return;
+      openM(c.getAttribute('data-deep'));
+    });
+    c.addEventListener('dblclick', function(e){ if(!e.target.closest('a')) openM(c.getAttribute('data-deep')); });
+  });
+  document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click', function(e){ e.stopPropagation(); openM(b.getAttribute('data-open')); }); });
+  document.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', closeAll); });
+  document.querySelectorAll('.overlay').forEach(function(o){ o.addEventListener('click', function(e){ if(e.target===o) closeAll(); }); });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape') closeAll();
+    var open=document.querySelector('.overlay.open');
+    if(open){ var i=order.indexOf(open.id);
+      if(e.key==='ArrowRight' && order[i+1]) openM(order[i+1]);
+      if(e.key==='ArrowLeft' && order[i-1]) openM(order[i-1]); }
+  });
+
+  /* ---- touch gestures in lessons: swipe left/right = next/prev, swipe down = close ---- */
+  var tX=0,tY=0,tT=0;
+  document.querySelectorAll('.overlay').forEach(function(o){
+    o.addEventListener('touchstart', function(e){ if(e.touches.length!==1) return; tX=e.touches[0].clientX; tY=e.touches[0].clientY; tT=Date.now(); }, {passive:true});
+    o.addEventListener('touchend', function(e){
+      if(Date.now()-tT>600) return;
+      var dx=e.changedTouches[0].clientX-tX, dy=e.changedTouches[0].clientY-tY;
+      var i=order.indexOf(o.id);
+      if(Math.abs(dx)>70 && Math.abs(dy)<60){
+        if(dx<0 && order[i+1]) openM(order[i+1]);
+        else if(dx>0 && order[i-1]) openM(order[i-1]);
+      } else if(dy>110 && Math.abs(dx)<70 && o.scrollTop<=0){ closeAll(); }
+    }, {passive:true});
+  });
+
+  /* ---- tabs / saved / search filtering ---- */
+  var tab='all', q='';
+  function refresh(){
+    var anyVisible=false;
+    zones.forEach(function(z,i){
+      var zoneOn = (tab==='all'||tab==='saved'||String(i)===tab);
+      var visInZone=0;
+      var zcards=z.querySelectorAll('.card');
+      zcards.forEach(function(c){
+        var id=c.getAttribute('data-deep');
+        var ok=zoneOn;
+        if(ok && tab==='saved') ok = !!(id && starState[id]);
+        if(ok && q){ ok = c.textContent.toLowerCase().indexOf(q)>=0; }
+        c.style.display = ok?'':'none'; if(ok) visInZone++;
+      });
+      var hasLib = z.querySelector('.lib');
+      if(hasLib){ var libOn = zoneOn && tab!=='saved' && !q; z.style.display = libOn?'':'none'; if(libOn) anyVisible=true; }
+      else { z.style.display = (zoneOn && visInZone>0)?'':'none'; if(zoneOn&&visInZone>0) anyVisible=true; }
+    });
+    emptyMsg.style.display = anyVisible?'none':'block';
+    progress();
+  }
+  function progress(){
+    var read=0; order.forEach(function(id){ if(readState[id]) read++; });
+    var pc=document.getElementById('pcount'), pf=document.getElementById('pfill'), ps=document.getElementById('psaved');
+    if(pc) pc.textContent = read+'/'+order.length+' lessons read';
+    if(pf) pf.style.width = (order.length? Math.round(read*100/order.length):0)+'%';
+    var stars=Object.keys(starState).length;
+    if(ps) ps.textContent = stars? ('★ '+stars+' saved') : '';
+  }
+  bar.querySelectorAll('.chip').forEach(function(ch){
+    ch.addEventListener('click', function(){
+      bar.querySelectorAll('.chip').forEach(function(x){x.classList.remove('active');});
+      ch.classList.add('active'); tab=ch.getAttribute('data-tab'); refresh();
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+  document.getElementById('btn-search').addEventListener('click', function(){
+    var r=document.getElementById('searchrow'); r.classList.toggle('open');
+    if(r.classList.contains('open')) document.getElementById('searchbox').focus();
+    else { document.getElementById('searchbox').value=''; q=''; refresh(); }
+  });
+  document.getElementById('searchbox').addEventListener('input', function(e){ q=e.target.value.trim().toLowerCase(); refresh(); });
+
+  /* ---- theme toggle: system → light → dark ---- */
+  var themeSeq=['system','light','dark'];
+  var curTheme = (function(){ try{ return localStorage.getItem('ddl-theme')||'system'; }catch(e){ return 'system'; } })();
+  function applyTheme(){
+    var root=document.documentElement;
+    if(curTheme==='system'){ delete root.dataset.theme; } else { root.dataset.theme=curTheme; }
+    var b=document.getElementById('btn-theme'); if(b) b.textContent = curTheme==='light'?'☀':(curTheme==='dark'?'☾':'◐');
+    try{ localStorage.setItem('ddl-theme', curTheme); }catch(e){}
+  }
+  document.getElementById('btn-theme').addEventListener('click', function(){
+    curTheme = themeSeq[(themeSeq.indexOf(curTheme)+1)%3]; applyTheme();
+  });
+
+  /* ---- motion: staggered card entrance + star pop ---- */
+  function animateIn(){
+    var vis = cards.filter(function(c){ return c.style.display!=='none'; });
+    vis.forEach(function(c,i){
+      c.classList.remove('anim'); void c.offsetWidth;
+      c.style.animationDelay = Math.min(i*55, 500)+'ms';
+      c.classList.add('anim');
+    });
+  }
+  document.querySelectorAll('.star').forEach(function(st){
+    st.addEventListener('click', function(){ st.classList.remove('pop'); void st.offsetWidth; st.classList.add('pop'); });
+  });
+  bar.querySelectorAll('.chip').forEach(function(ch){ ch.addEventListener('click', function(){ setTimeout(animateIn, 20); }); });
+  animateIn();
+
+
+  /* ---- font size control ---- */
+  var fsSteps=[0.85,0.925,1,1.075,1.15,1.25];
+  var fsIdx=(function(){ try{ var v=parseInt(localStorage.getItem('ddl-fsize')); return isNaN(v)?2:Math.max(0,Math.min(fsSteps.length-1,v)); }catch(e){ return 2; } })();
+  function applyFs(){
+    document.body.style.zoom=fsSteps[fsIdx];
+    try{ localStorage.setItem('ddl-fsize', fsIdx); }catch(e){}
+    var m=document.getElementById('btn-fminus'), p=document.getElementById('btn-fplus');
+    if(m) m.disabled = fsIdx<=0;
+    if(p) p.disabled = fsIdx>=fsSteps.length-1;
+  }
+  document.getElementById('btn-fminus').addEventListener('click', function(){ if(fsIdx>0){ fsIdx--; applyFs(); } });
+  document.getElementById('btn-fplus').addEventListener('click', function(){ if(fsIdx<fsSteps.length-1){ fsIdx++; applyFs(); } });
+  applyFs();
+
+
+  /* ---- mobile nav: section sheet + reader sheet ---- */
+  var fullNames=['Telangana Real Estate','Telangana Politics','Bengaluru Real Estate','Karnataka Politics','Concept Library'];
+  var mb=document.createElement('div'); mb.className='mobilebar';
+  mb.innerHTML='<button class="mb-section" id="mb-sections">All Stories <span class="caret">▾</span></button>'
+    +'<div class="mb-actions"><button class="mb-btn" id="mb-search" aria-label="Search">⌕</button>'
+    +'<button class="mb-btn" id="mb-aa" aria-label="Reading settings">Aa</button></div>';
+  bar.insertBefore(mb, bar.firstChild);
+
+  function makeSheet(id, inner){
+    var w=document.createElement('div'); w.className='bsheet-wrap'; w.id=id;
+    w.innerHTML='<div class="bsheet-back"></div><div class="bsheet"><div class="bs-handle"></div>'+inner+'</div>';
+    document.body.appendChild(w);
+    w.querySelector('.bsheet-back').addEventListener('click', function(){ w.classList.remove('open'); });
+    var sy=0;
+    w.querySelector('.bsheet').addEventListener('touchstart', function(e){ sy=e.touches[0].clientY; }, {passive:true});
+    w.querySelector('.bsheet').addEventListener('touchend', function(e){ if(e.changedTouches[0].clientY - sy > 90) w.classList.remove('open'); }, {passive:true});
+    return w;
+  }
+
+  var rowsHtml='<div class="bs-title">Sections</div>';
+  rowsHtml+='<button class="bs-row active" data-pick="all"><span class="nm">All Stories</span><span class="ct" id="ct-all"></span></button>';
+  zones.forEach(function(z,i){
+    rowsHtml+='<button class="bs-row" data-pick="'+i+'"><span class="nm">'+(fullNames[i]||labels[i])+'</span><span class="ct" id="ct-'+i+'"></span></button>';
+  });
+  rowsHtml+='<button class="bs-row" data-pick="saved"><span class="nm">★ Saved stories</span><span class="ct" id="ct-saved"></span></button>';
+  var secSheet=makeSheet('sheet-sections', rowsHtml);
+
+  function sectionCounts(){
+    var all=0;
+    zones.forEach(function(z,i){
+      var n=z.querySelectorAll('.card[data-deep]').length; all+=n;
+      var el=document.getElementById('ct-'+i);
+      if(el) el.textContent = z.querySelector('.lib') ? (z.querySelectorAll('.lib dt').length+' terms') : (n+(n===1?' story':' stories'));
+    });
+    var a=document.getElementById('ct-all'); if(a) a.textContent=all+' stories';
+    var sv=document.getElementById('ct-saved'); if(sv) sv.textContent=Object.keys(starState).length+' saved';
+  }
+
+  document.getElementById('mb-sections').addEventListener('click', function(){
+    sectionCounts(); secSheet.classList.add('open');
+  });
+  secSheet.querySelectorAll('.bs-row').forEach(function(row){
+    row.addEventListener('click', function(){
+      var pick=row.getAttribute('data-pick');
+      var chip=bar.querySelector('.chip[data-tab="'+pick+'"]');
+      if(chip) chip.click();
+      secSheet.querySelectorAll('.bs-row').forEach(function(r){ r.classList.remove('active'); });
+      row.classList.add('active');
+      document.getElementById('mb-sections').innerHTML=row.querySelector('.nm').textContent+' <span class="caret">▾</span>';
+      secSheet.classList.remove('open');
+    });
+  });
+
+  var rsHtml='<div class="bs-title">Reading</div>'
+    +'<div class="rs-block"><div class="rs-label">Text size</div><div class="rs-sizer">'
+    +'<button class="sm" id="rs-minus">A−</button><button class="lg" id="rs-plus">A+</button></div>'
+    +'<div class="rs-dots" id="rs-dots"></div></div>'
+    +'<div class="rs-block"><div class="rs-label">Theme</div><div class="rs-theme">'
+    +'<button data-th="system">Auto</button><button data-th="light">Light</button><button data-th="dark">Dark</button></div></div>';
+  var rSheet=makeSheet('sheet-reader', rsHtml);
+  var dotsEl=rSheet.querySelector('#rs-dots');
+  fsSteps.forEach(function(){ var d=document.createElement('span'); dotsEl.appendChild(d); });
+  function rsSync(){
+    dotsEl.querySelectorAll('span').forEach(function(d,i){ d.classList.toggle('on', i<=fsIdx); });
+    rSheet.querySelector('#rs-minus').disabled = fsIdx<=0;
+    rSheet.querySelector('#rs-plus').disabled = fsIdx>=fsSteps.length-1;
+    rSheet.querySelectorAll('.rs-theme button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-th')===curTheme); });
+  }
+  rSheet.querySelector('#rs-minus').addEventListener('click', function(){ if(fsIdx>0){ fsIdx--; applyFs(); rsSync(); } });
+  rSheet.querySelector('#rs-plus').addEventListener('click', function(){ if(fsIdx<fsSteps.length-1){ fsIdx++; applyFs(); rsSync(); } });
+  rSheet.querySelectorAll('.rs-theme button').forEach(function(b){
+    b.addEventListener('click', function(){ curTheme=b.getAttribute('data-th'); applyTheme(); rsSync(); });
+  });
+  document.getElementById('mb-aa').addEventListener('click', function(){ rsSync(); rSheet.classList.add('open'); });
+  document.getElementById('mb-search').addEventListener('click', function(){ document.getElementById('btn-search').click(); });
+
+  applyTheme(); progress();
+})();
+</script>
+<script>(function(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;var m=document.getElementById(h);if(m){m.classList.add("open");document.body.style.overflow="hidden";m.scrollTop=0;}})();</script>
+</body>
+</html>

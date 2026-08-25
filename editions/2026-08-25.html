@@ -260,44 +260,11 @@
   .rs-theme button{font-family:var(--sans); font-size:14px; font-weight:600; flex:1; padding:11px 0; border-radius:12px; border:1px solid var(--line); background:var(--def-bg); color:var(--ink); cursor:pointer;}
   .rs-theme button.on{background:var(--accent); border-color:var(--accent); color:var(--paper);}
 
-
-  /* ==== SEARCH & ARCHIVE (shell v1.2) ==== */
-  .so-wrap{position:fixed; inset:0; z-index:220; display:none;}
-  .so-wrap.open{display:block;}
-  .so-back{position:absolute; inset:0; background:rgba(22,21,18,.55); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);}
-  .so{position:absolute; left:50%; transform:translateX(-50%); top:4vh; width:min(680px,94vw); max-height:90vh; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 30px 70px rgba(0,0,0,.4); overflow:hidden; animation:soIn .22s ease;}
-  @keyframes soIn{from{opacity:0; transform:translateX(-50%) translateY(14px);} to{opacity:1; transform:translateX(-50%) translateY(0);}}
-  @media(max-width:700px){ .so{top:auto; bottom:0; left:0; transform:none; width:100%; max-height:88vh; border-radius:18px 18px 0 0; animation:soUp .25s ease;} }
-  @keyframes soUp{from{transform:translateY(40px); opacity:.4;} to{transform:translateY(0); opacity:1;}}
-  .so-head{padding:14px 14px 10px; border-bottom:1px solid var(--line); flex:0 0 auto;}
-  .so-inrow{display:flex; gap:8px; align-items:stretch;}
-  .so-input{flex:1; min-width:0; font:16px var(--sans); padding:11px 14px; border:1.5px solid var(--line); border-radius:10px; background:var(--paper); color:var(--ink); outline:none;}
-  .so-input:focus{border-color:var(--accent);}
-  .so-ready{font-family:var(--sans); font-weight:700; font-size:14px; letter-spacing:.6px; padding:0 20px; border:none; border-radius:10px; background:var(--accent); color:#fff; cursor:pointer; transition:transform .1s;}
-  .so-ready:active{transform:scale(.96);}
-  .so-close{font-size:15px; padding:0 12px; border:1.5px solid var(--line); border-radius:10px; background:transparent; color:var(--muted); cursor:pointer;}
-  .so-scopes{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; align-items:center;}
-  .so-lbl{font:600 11.5px var(--sans); letter-spacing:1.4px; text-transform:uppercase; color:var(--muted); margin-right:2px;}
-  .so-scope{font:600 12.5px var(--sans); padding:7px 13px; border-radius:999px; border:1.5px solid var(--line); background:transparent; color:var(--muted); cursor:pointer;}
-  .so-scope.on{background:var(--ink); color:var(--paper); border-color:var(--ink);}
-  .so-scope.allin.on{background:var(--accent); border-color:var(--accent); color:#fff;}
-  .so-meta{flex:0 0 auto; font:12px var(--sans); color:var(--muted); padding:9px 16px 0;}
-  .so-body{overflow-y:auto; padding:0 8px 22px; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;}
-  .so-datehead{position:sticky; top:0; z-index:2; background:var(--surface); display:flex; justify-content:space-between; align-items:baseline; font:700 11.5px var(--sans); letter-spacing:1.8px; text-transform:uppercase; color:var(--accent); padding:13px 8px 6px; border-bottom:1px solid var(--line);}
-  .so-datehead .tdy{color:var(--seal); letter-spacing:1.2px;}
-  .so-hit{display:block; width:100%; text-align:left; background:transparent; border:none; border-bottom:1px solid var(--line); padding:12px 8px; cursor:pointer; font:inherit; color:var(--ink);}
-  .so-hit:hover, .so-hit:focus-visible{background:rgba(168,134,44,.08); outline:none;}
-  .so-hit .zt{font:700 10.5px var(--sans); letter-spacing:1.3px; text-transform:uppercase; color:var(--muted);}
-  .so-hit .zt .impdot{color:var(--seal);}
-  .so-hit h4{font-family:var(--serif); font-size:17px; line-height:1.32; margin:3px 0; font-weight:600;}
-  .so-hit .sn{font-size:13.5px; line-height:1.5; color:var(--muted);}
-  .so-hit mark{background:rgba(168,134,44,.3); color:inherit; border-radius:3px; padding:0 1px;}
-  .so-none{padding:34px 16px; text-align:center; color:var(--muted); font-size:14.5px;}
-  .bs-row .nm .arch-ic{opacity:.85; margin-right:4px;}
 </style>
 
 </head>
 <body>
+<div style="position:sticky;top:0;z-index:9999;background:#161512;color:#f6f3ec;font-family:Inter,-apple-system,sans-serif;font-size:14px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;"><span>&#128218; Archived edition &middot; Tuesday, 25 August 2026</span><a href="../index.html" style="color:#e8c469;text-decoration:none;font-weight:600;white-space:nowrap;">&#8249; Today&rsquo;s paper</a></div>
 <div class="wrap">
 <header class="masthead">
   <h1>The Deccan Ledger<span class="tick">.</span></h1>
@@ -388,6 +355,28 @@
 </section>
 
 <!-- ==================== KARNATAKA POLITICS ==================== -->
+<section class="zone">
+  <div class="zone-head">Karnataka Politics</div>
+
+  <div class="card imp" data-deep="m-nagendra-siege-outcome">
+    <span class="tag">IMPORTANT</span>
+    <h2>The siege happened: police detain Vijayendra, Ashoka and CT Ravi at Vidhana Soudha; Assembly then adjourned sine die, three days early, with Nagendra still in his job</h2>
+    <div class="srcline">Sources: ANI (multiple wires, 10:08 AM–2:50 PM IST), Deccan Herald, The Statesman, The Week &amp; Deccan Chronicle &middot; published 24 Aug 2026</div>
+    <div class="story">
+      <p>The BJP-JD(S) march from Freedom Park to Vidhana Soudha went ahead at 9:30 AM on 24 August as announced. Police blocked all gates and pre-emptively detained BJP state president B.Y. Vijayendra, Leader of the Opposition R. Ashoka and senior leader CT Ravi, along with many cadre. Ashoka accused police of rough handling and announced an indefinite day-and-night Assembly dharna until Minister B. Nagendra resigns over the Valmiki Corporation scam — but the Speaker adjourned the session sine die that same day, three days ahead of schedule, effectively ending the sitting the Opposition had vowed to occupy. BJP leaders then marched to Raj Bhavan and petitioned Governor Thawarchand Gehlot to seek an explanation from CM D.K. Shivakumar. Nagendra has not resigned.</p>
+    </div>
+    <div class="why"><b>Why it matters to you:</b> same lesson as yesterday, now with a harder edge — the government let the whole Assembly session end early rather than remove one minister. When an institution will sacrifice its own legislative calendar to protect a person, that person (or whoever controls what he controls) is more important to the power structure than the session itself.</div>
+    <div class="deepbar"><span>Press for the siege, the detentions and why the House closed early</span><button class="deep-btn" data-open="m-nagendra-siege-outcome">Go deep ▸</button></div>
+  </div>
+
+  <div class="card mini" data-deep="m-sir-draft-roll">
+    <h2>Karnataka's first SIR draft electoral roll cuts 1.07 crore names — nearly half of Bengaluru's voter list flagged for review</h2>
+    <div class="srcline">Sources: Siasat, Deccan Herald &amp; Scroll.in &middot; published 24 Aug 2026</div>
+    <div class="story">Karnataka's Special Intensive Revision (SIR) draft electoral roll shows 4.47 crore voters, down from 5.54 crore — 1.07 crore names (about 19%) moved to an "Absent/Shifted/Dead/Duplicate/Other" category pending verification. In Bengaluru alone, 46.88 lakh of 1.03 crore voters (45%) are flagged, split almost evenly between BJP-held and Congress-held seats. Claims and objections run 24 August–23 September; the final roll is due 27 October.</div>
+    <div class="why"><b>Why it matters to you:</b> not a land story directly, but a reminder of how fast a "provisional" government list — voter roll today, survey number tomorrow — can knock someone off a register pending paperwork. The same discipline (check, don't assume) applies to both.</div>
+    <div class="deepbar"><button class="deep-btn" data-open="m-sir-draft-roll">Go deep ▸</button></div>
+  </div>
+</section>
 
 <!-- ==================== CONCEPT LIBRARY ==================== -->
 
@@ -721,9 +710,77 @@
   </div>
 </div>
 
+<div class="overlay" id="m-nagendra-siege-outcome">
+  <div class="sheet">
+    <button class="close" data-close>Close ✕</button>
+    <h2>🎓 The siege, the detentions, and a House that closed rather than give an inch</h2>
+    <div class="srcline">Built from: ANI, Deccan Herald, The Statesman, The Week, Deccan Chronicle &middot; 24 Aug 2026</div>
+    <div class="dsec"><h3>📖 The story so far</h3>
+      <p>B. Nagendra, Karnataka's Planning &amp; Statistics Minister, first resigned in June 2024 over the Karnataka Maharshi Valmiki Scheduled Tribes Development Corporation (KMVSTDCL) embezzlement scandal — funds meant for tribal welfare allegedly diverted from the corporation's bank accounts, an initial ₹89 crore transfer with a broader ~₹187 crore diversion alleged overall. He was reinducted into the D.K. Shivakumar-led Cabinet on 3 August 2026, and last week was handed an additional charge (the Kalyana Karnataka Region Development Secretariat) rather than removed, prompting days of BJP-JD(S) Assembly disruption. On 23 August, BJP's R. Ashoka announced a march from Freedom Park and a siege of Vidhana Soudha for 9:30 AM the next morning.</p>
+    </div>
+    <div class="dsec"><h3>⚡ What happened now</h3>
+      <p>The march went ahead as planned on 24 August. Police blockaded all four gates of Vidhana Soudha and, in a pre-emptive move, physically detained BJP state president B.Y. Vijayendra, Leader of the Opposition R. Ashoka, and senior leader CT Ravi, along with many cadre (some loaded onto BMTC buses). Ashoka accused police of rough handling and called it an attack on the opposition; Vijayendra accused the government's "cup of sins" of overflowing and called CM D.K. Shivakumar a "hooligan" in response to Shivakumar's own "hooliganism" jibe at the protest. Congress ran a simultaneous counter-protest at the Gandhi statue. At 2:21 PM, Ashoka announced an indefinite day-and-night Assembly dharna until Nagendra resigns — but the Speaker adjourned the entire session sine die that same day, three days ahead of the scheduled 27 August finish, ending the very floor the dharna was meant to occupy. BJP leaders then marched to Raj Bhavan and petitioned Governor Thawarchand Gehlot to seek a formal explanation from CM Shivakumar on Nagendra's reinduction and the status of CBI/Lokayukta proceedings against him. Nagendra has not resigned and continues to say he is being targeted because he is Dalit.</p>
+    </div>
+    <div class="dsec"><h3>🔮 What happens next</h3>
+      <div class="watch">Watch: BJP's planned padayatra demanding Nagendra's resignation, expected to start from the Ballari region around 26 August, route still being finalised; whether Governor Gehlot responds to the memorandum; any further reshuffle or resignation move; the underlying ED/CBI chargesheet process against Nagendra, despite the state's own SIT having reportedly cleared him.</div>
+    </div>
+    <div class="dsec"><h3>👤 Who&rsquo;s who</h3>
+      <div class="who-item"><b>B. Nagendra</b> — Planning &amp; Statistics Minister, Karnataka; target of the resignation demand, has not resigned.</div>
+      <div class="who-item"><b>D.K. Shivakumar</b> — Karnataka Chief Minister (since 3 June 2026); accused of protecting Nagendra.</div>
+      <div class="who-item"><b>B.Y. Vijayendra</b> — Karnataka BJP state president; detained at the siege.</div>
+      <div class="who-item"><b>R. Ashoka</b> — Leader of the Opposition, Karnataka Assembly; detained; announced the (short-lived) indefinite dharna; petitioned the Governor.</div>
+      <div class="who-item"><b>CT Ravi</b> — senior BJP leader; detained.</div>
+      <div class="who-item"><b>H.D. Kumaraswamy</b> — Union Minister, JD(S) state president; backed continuing the agitation.</div>
+      <div class="who-item"><b>Thawarchand Gehlot</b> — Governor of Karnataka; received the BJP memorandum.</div>
+      <div class="who-item"><b>G.S. Patil</b> — Speaker, Karnataka Legislative Assembly; adjourned the session sine die.</div>
+    </div>
+    <div class="dsec"><h3>🧠 Learn the concepts (from zero)</h3>
+      <div class="concept"><b class="term">Sine die adjournment as a pressure valve.</b> A Speaker can end a session "without a fixed date" for reconvening at any point. Doing so mid-protest — rather than letting the Opposition's promised dharna actually unfold on the floor — is a way for the government to simply remove the stage the protest needed, without ever formally negotiating or conceding anything.</div>
+      <div class="concept"><b class="term">Pre-emptive detention.</b> Detaining protest leaders before they reach their target, rather than after, is designed to blunt a protest's visual and disruptive impact. It's usually brief (hours), but it reliably produces its own grievance narrative — "rough handling," "attack on democracy" — which the detained side can then use just as effectively as the original protest.</div>
+      <div class="concept"><b class="term">SIT clean chit vs ED/CBI chargesheet.</b> A state's own Special Investigation Team clearing someone, while central agencies simultaneously chargesheet the same person for the same conduct, isn't necessarily a contradiction — different agencies can apply different evidentiary thresholds, and state vs central investigative independence is itself often a live political question in cases like this.</div>
+    </div>
+    <div class="dsec"><h3>🎯 IAS Pointer</h3>
+      <p>Public-fund embezzlement and welfare-corporation oversight (GS2 — governance, transparency); the constitutional role of the Governor as a channel for opposition grievances against a state government (GS2); the interplay of state SIT and central ED/CBI investigations (GS2/GS3); legislative procedure and the political use of sine die adjournment.</p>
+    </div>
+    <div class="dsec"><h3>⭐ Make-me-a-pro</h3>
+      <div class="pro"><p>The opposition built its entire play around occupying the Assembly floor indefinitely — and the government's answer wasn't to fight them on that floor, it was to close the floor itself, three days early, and let the physical siege outside end in a police van rather than a resignation. That's a government choosing to absorb the embarrassment of ending its own session under pressure rather than the embarrassment of removing a minister under pressure — and the calculation only makes sense if keeping Nagendra in his chair is worth more than the session's remaining three days. For a developer, the transferable read isn't about Nagendra specifically, it's about noticing which cost a government is willing to eat. Governments protect what they've decided is structurally important — a minister who controls a valuable portfolio, a scheme, a land bank, a vote bank — and they'll burn calendar time, headlines, even a full legislative session to keep it, rather than negotiate. When you see that pattern near anything land-related — a development authority chief, an allotment scheme, a discretionary fund — read it the same way: the fight tells you exactly where the real value sits.</p></div>
+    </div>
+    <div class="lessonnav"></div>
+  </div>
+</div>
 
-
-
+<div class="overlay" id="m-sir-draft-roll">
+  <div class="sheet">
+    <button class="close" data-close>Close ✕</button>
+    <h2>🎓 1.07 crore names, one draft list, and a lesson in "provisional" government records</h2>
+    <div class="srcline">Built from: Siasat, Deccan Herald, Scroll.in &middot; 24 Aug 2026</div>
+    <div class="dsec"><h3>📖 The story so far</h3>
+      <p>The Election Commission's Special Intensive Revision (SIR) is a ground-up re-verification of a state's entire electoral roll, rather than the routine annual update — every voter is re-checked, and anyone not freshly confirmed is provisionally moved into a review category pending a claims-and-objections window. Congress, including CM D.K. Shivakumar, has attacked SIR nationally as a "vote chori" (vote theft) exercise, alleging it risks wrongly deleting large numbers of genuine voters, and had signalled it may legally challenge the process in Karnataka.</p>
+    </div>
+    <div class="dsec"><h3>⚡ What happened now</h3>
+      <p>On 24 August, Karnataka published its first SIR draft electoral roll: 4.47 crore voters, down from 5.54 crore before the exercise — 1.07 crore names (about 19%) moved into an "Absent/Shifted/Dead/Duplicate/Other" (ASDDO) category pending verification. The draft shows 2.22 crore male, 2.25 crore female and 2,871 third-gender voters. In Bengaluru specifically, 46.88 lakh of 1.03 crore voters (45%) fall in the ASDDO category, split almost evenly between the city's 15 BJP-held seats (27.69 lakh flagged) and 12 Congress-held seats (16.79 lakh flagged) — undercutting a simple one-party-targeted narrative. Bengaluru South (BJP) recorded the city's highest flagged count; Shivajinagar (Congress) the lowest. Congress MLA Dinesh Gundu Rao voiced concern over the scale of exclusions in his own Gandhinagar constituency (1.12 lakh flagged).</p>
+    </div>
+    <div class="dsec"><h3>🔮 What happens next</h3>
+      <div class="watch">Watch: the claims-and-objections window, open 24 August–23 September, via Form 6 (include a wrongly-excluded name), Form 7 (delete, e.g. a deceased voter) or Form 8 (correction); the final electoral roll, due 27 October — the real test is how many of the 1.07 crore names get restored versus permanently dropped.</div>
+    </div>
+    <div class="dsec"><h3>👤 Who&rsquo;s who</h3>
+      <div class="who-item"><b>Karnataka's Chief Electoral Officer</b> — administers the SIR roll and the claims process.</div>
+      <div class="who-item"><b>Dinesh Gundu Rao</b> — Congress MLA, Gandhinagar, and Karnataka Health Minister; flagged concern over exclusion numbers.</div>
+      <div class="who-item"><b>D.K. Shivakumar</b> — Karnataka Chief Minister; has criticised SIR nationally as risking wrongful deletions.</div>
+    </div>
+    <div class="dsec"><h3>🧠 Learn the concepts (from zero)</h3>
+      <div class="concept"><b class="term">Special Intensive Revision (SIR).</b> Unlike the routine annual voter-roll update (which mostly adds new 18-year-olds and removes confirmed deaths), an SIR re-verifies literally every existing entry from scratch. Anyone the fresh verification can't immediately confirm — because they've moved, can't be traced, or the record looks duplicated — gets provisionally dropped, not permanently deleted, pending the objections window.</div>
+      <div class="concept"><b class="term">"Provisional" government lists, generally.</b> A draft roll, a prohibited-property list, a pending-application queue — Indian administrative systems lean heavily on this two-step pattern: publish a wide, imperfect first cut, then run a correction window before anything becomes final. The practical rule for anyone affected is the same every time: never assume you're safely on (or off) a list until the final, notified version says so.</div>
+    </div>
+    <div class="dsec"><h3>🎯 IAS Pointer</h3>
+      <p>Electoral roll revision processes and the Election Commission's constitutional mandate under Article 324 (GS2 — polity); the balance between electoral-roll accuracy and the risk of wrongful disenfranchisement; the political contestation around SIR as a live federalism and electoral-governance issue.</p>
+    </div>
+    <div class="dsec"><h3>⭐ Make-me-a-pro</h3>
+      <div class="pro"><p>Overnight, 1.07 crore Karnataka voters found themselves provisionally off the list — not because anyone proved they shouldn't vote, but because a re-verification exercise couldn't yet confirm they should stay on it. Multiply that same administrative logic across every government record a developer depends on, and you have the single most useful habit this newspaper keeps returning to: a government list is a snapshot of what officials could confirm by a deadline, not a permanent judgment on the underlying truth. The voter roll gets a month-long objections window and a named final-publication date; a 22A-frozen survey number gets a grievance line and a review committee; a MUDA khata gets a cancellation order. Different subject, same shape. Whatever list your plot, your buyer, or your JD partner's title happens to sit on, the professional habit is identical — check where it stands today, not where a headline three months ago said it stood.</p></div>
+    </div>
+    <div class="lessonnav"></div>
+  </div>
+</div>
 
 
 <div class="overlay" id="ls-farmland-city">
@@ -754,14 +811,15 @@
   /* ---- app bar ---- */
   var masthead = document.querySelector('header.masthead');
   var zones = Array.prototype.slice.call(document.querySelectorAll('section.zone'));
-  var labels = ['TG · Estate','TG · Politics','BLR · Estate','School','Library'];
+  var labels = ['TG · Estate','TG · Politics','BLR · Estate','KA · Politics','School','Library'];
   var bar = document.createElement('div'); bar.className='appbar';
   var chipsHtml = '<button class="chip active" data-tab="all">All</button>';
   zones.forEach(function(z,i){ chipsHtml += '<button class="chip" data-tab="'+i+'">'+(labels[i]||('Section '+(i+1)))+'</button>'; });
   chipsHtml += '<button class="chip" data-tab="saved">★ Saved</button>';
   bar.innerHTML = '<div class="appbar-row"><div class="chips">'+chipsHtml+'</div>'
     + '<button class="icon-btn fs" id="btn-fminus" title="Smaller text" aria-label="Smaller text">A−</button><button class="icon-btn fs" id="btn-fplus" title="Larger text" aria-label="Larger text">A+</button><button class="icon-btn" id="btn-search" title="Search" aria-label="Search">⌕</button>'
-    + '<button class="icon-btn" id="btn-archive" title="Past editions" aria-label="Past editions">▤</button><button class="icon-btn" id="btn-theme" title="Theme" aria-label="Theme">◐</button></div>'
+    + '<button class="icon-btn" id="btn-theme" title="Theme" aria-label="Theme">◐</button></div>'
+    + '<div class="searchrow" id="searchrow"><input id="searchbox" type="search" placeholder="Search today&rsquo;s stories…" aria-label="Search stories"></div>'
     + '<div class="progressbar"><span id="pcount"></span><div class="ptrack"><div class="pfill" id="pfill"></div></div><span id="psaved"></span></div>';
   masthead.parentNode.insertBefore(bar, masthead.nextSibling);
   var emptyMsg = document.createElement('div'); emptyMsg.className='empty-msg';
@@ -890,8 +948,12 @@
       window.scrollTo({top:0, behavior:'smooth'});
     });
   });
-  document.getElementById('btn-search').addEventListener('click', function(){ openSearch(); });
-  document.getElementById('btn-archive').addEventListener('click', function(){ openArchive(); });
+  document.getElementById('btn-search').addEventListener('click', function(){
+    var r=document.getElementById('searchrow'); r.classList.toggle('open');
+    if(r.classList.contains('open')) document.getElementById('searchbox').focus();
+    else { document.getElementById('searchbox').value=''; q=''; refresh(); }
+  });
+  document.getElementById('searchbox').addEventListener('input', function(e){ q=e.target.value.trim().toLowerCase(); refresh(); });
 
   /* ---- theme toggle: system → light → dark ---- */
   var themeSeq=['system','light','dark'];
@@ -938,7 +1000,7 @@
 
 
   /* ---- mobile nav: section sheet + reader sheet ---- */
-  var fullNames=['Telangana Real Estate','Telangana Politics','Bengaluru Real Estate','Land School','Concept Library'];
+  var fullNames=['Telangana Real Estate','Telangana Politics','Bengaluru Real Estate','Karnataka Politics','Land School','Concept Library'];
   var mb=document.createElement('div'); mb.className='mobilebar';
   mb.innerHTML='<button class="mb-section" id="mb-sections">All Stories <span class="caret">▾</span></button>'
     +'<div class="mb-actions"><button class="mb-btn" id="mb-search" aria-label="Search">⌕</button>'
@@ -962,7 +1024,6 @@
     rowsHtml+='<button class="bs-row" data-pick="'+i+'"><span class="nm">'+(fullNames[i]||labels[i])+'</span><span class="ct" id="ct-'+i+'"></span></button>';
   });
   rowsHtml+='<button class="bs-row" data-pick="saved"><span class="nm">★ Saved stories</span><span class="ct" id="ct-saved"></span></button>';
-  rowsHtml+='<button class="bs-row" data-pick="__archive"><span class="nm"><span class="arch-ic">📅</span>Past editions</span><span class="ct">browse by date</span></button>';
   var secSheet=makeSheet('sheet-sections', rowsHtml);
 
   function sectionCounts(){
@@ -982,7 +1043,6 @@
   secSheet.querySelectorAll('.bs-row').forEach(function(row){
     row.addEventListener('click', function(){
       var pick=row.getAttribute('data-pick');
-      if(pick==='__archive'){ secSheet.classList.remove('open'); openArchive(); return; }
       var chip=bar.querySelector('.chip[data-tab="'+pick+'"]');
       if(chip) chip.click();
       secSheet.querySelectorAll('.bs-row').forEach(function(r){ r.classList.remove('active'); });
@@ -1015,210 +1075,14 @@
   document.getElementById('mb-aa').addEventListener('click', function(){ rsSync(); rSheet.classList.add('open'); });
   document.getElementById('mb-search').addEventListener('click', function(){ document.getElementById('btn-search').click(); });
 
-
-  /* ---- SEARCH v2 + PAST EDITIONS (shell v1.2) ---- */
-  var ED='editions/';
-  var idxCache=null, idxPromise=null;
-  function loadIndex(){
-    if(idxPromise) return idxPromise;
-    idxPromise = Promise.all([
-      fetch(ED+'search-index.json',{cache:'no-cache'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }),
-      fetch(ED+'index.json',{cache:'no-cache'}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
-    ]).then(function(a){ idxCache={entries:a[0].entries||[], editions:a[1].editions||[], months:a[0].months||[]}; return idxCache; });
-    return idxPromise;
-  }
-  function newestDate(){ return (idxCache && idxCache.editions.length) ? idxCache.editions[0].date : ''; }
-  /* full-text bodies, sharded by month, fetched only for the active scope */
-  var bodies={}, bodyReq={};
-  function monthsInScope(){
-    if(!idxCache) return [];
-    var all=idxCache.months||[];
-    if(scopeDays==='all') return all.slice();
-    var nd=newestDate(); if(!nd) return all.slice();
-    if(scopeDays==='1') return [nd.slice(0,7)];
-    var lim=new Date(nd+'T00:00:00'); lim.setDate(lim.getDate()-29);
-    var lo=lim.toISOString().slice(0,7);
-    return all.filter(function(mo){ return mo>=lo && mo<=nd.slice(0,7); });
-  }
-  function ensureBodies(){
-    var need=monthsInScope().filter(function(mo){ return !bodies[mo]; });
-    return Promise.all(need.map(function(mo){
-      if(!bodyReq[mo]) bodyReq[mo]=fetch(ED+'search-body-'+mo+'.json',{cache:'no-cache'})
-        .then(function(r){ return r.ok? r.json():{} }).catch(function(){ return {}; })
-        .then(function(j){ bodies[mo]=j; });
-      return bodyReq[mo];
-    }));
-  }
-  function bodyOf(e){ var m=bodies[e.d.slice(0,7)]; return (m && m[e.d+'|'+e.id]) || ''; }
-  function niceDate(d){
-    var dt=new Date(d+'T00:00:00');
-    return dt.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
-  }
-
-  /* overlay */
-  var so=document.createElement('div'); so.className='so-wrap'; so.id='search-overlay';
-  so.innerHTML='<div class="so-back"></div><div class="so">'
-   +'<div class="so-head"><div class="so-inrow">'
-   +'<input class="so-input" id="so-q" type="search" placeholder="Search every story ever printed…" aria-label="Search all editions">'
-   +'<button class="so-ready" id="so-ready">Ready</button>'
-   +'<button class="so-close" id="so-x" aria-label="Close search">✕</button></div>'
-   +'<div class="so-scopes"><span class="so-lbl">Scope</span>'
-   +'<button class="so-scope" data-days="1">Today</button>'
-   +'<button class="so-scope on" data-days="30">Last 30 days</button>'
-   +'<button class="so-scope allin" data-days="all">⚡ Go all in</button></div></div>'
-   +'<div class="so-meta" id="so-meta"></div><div class="so-body" id="so-body"></div></div>';
-  document.body.appendChild(so);
-  var soQ=so.querySelector('#so-q'), soBody=so.querySelector('#so-body'), soMeta=so.querySelector('#so-meta');
-  var scopeDays='30';
-
-  function openSearch(){
-    so.classList.add('open'); document.body.style.overflow='hidden';
-    soMeta.textContent='Loading the archive index…';
-    loadIndex().then(function(){ runSearch(); soQ.focus(); })
-      .catch(function(){ soMeta.textContent=''; soBody.innerHTML='<div class="so-none">Could not load the archive index — check your connection and try again.</div>'; });
-  }
-  function closeSearch(){ so.classList.remove('open'); document.body.style.overflow=''; }
-  so.querySelector('.so-back').addEventListener('click', closeSearch);
-  so.querySelector('#so-x').addEventListener('click', closeSearch);
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && so.classList.contains('open')) closeSearch(); });
-  so.querySelectorAll('.so-scope').forEach(function(b){
-    b.addEventListener('click', function(){
-      so.querySelectorAll('.so-scope').forEach(function(x){x.classList.remove('on');});
-      b.classList.add('on'); scopeDays=b.getAttribute('data-days'); runSearch();
-    });
-  });
-  so.querySelector('#so-ready').addEventListener('click', runSearch);
-  soQ.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); runSearch(); } });
-  var deb=null;
-  soQ.addEventListener('input', function(){ clearTimeout(deb); deb=setTimeout(runSearch,180); });
-
-  function escRe(x){ return x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
-  function toks(str){ return str.toLowerCase().replace(/[^\w\s₹-]/g,' ').split(/\s+/).filter(Boolean); }
-  function inScope(e){
-    if(scopeDays==='all') return true;
-    var nd=newestDate(); if(!nd) return true;
-    if(scopeDays==='1') return e.d===nd;
-    var lim=new Date(nd+'T00:00:00'); lim.setDate(lim.getDate()-29);
-    return new Date(e.d+'T00:00:00')>=lim;
-  }
-  function scoreOf(e, terms, phrase){
-    var t=e.t.toLowerCase(), sm=(e.s||'').toLowerCase(), b=bodyOf(e).toLowerCase(), z=(e.z||'').toLowerCase();
-    var total=0;
-    for(var i=0;i<terms.length;i++){
-      var w=terms[i], sc=0, wb=new RegExp('\\b'+escRe(w));
-      if(new RegExp('\\b'+escRe(w)+'\\b').test(t)) sc=12; else if(wb.test(t)) sc=9; else if(t.indexOf(w)>=0) sc=7;
-      else if(wb.test(sm)) sc=5; else if(sm.indexOf(w)>=0) sc=4;
-      else if(b.indexOf(w)>=0) sc=3; else if(z.indexOf(w)>=0) sc=2;
-      if(!sc) return 0;
-      total+=sc;
-    }
-    if(phrase && terms.length>1){
-      if(t.indexOf(phrase)>=0) total+=20;
-      else if(sm.indexOf(phrase)>=0 || b.indexOf(phrase)>=0) total+=8;
-    }
-    if(e.imp) total+=1.5;
-    return total;
-  }
-  function mk(text, terms){
-    var out=text;
-    terms.forEach(function(w){ out=out.replace(new RegExp('('+escRe(w)+')','ig'),'\u0001$1\u0002'); });
-    out=out.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return out.replace(/\u0001/g,'<mark>').replace(/\u0002/g,'</mark>');
-  }
-  function snippet(e, terms){
-    if(!terms.length) return e.s ? e.s.slice(0,160) : bodyOf(e).slice(0,160);
-    var fields=[e.s||'', bodyOf(e)];
-    for(var f=0; f<fields.length; f++){
-      var lo=fields[f].toLowerCase();
-      for(var i=0;i<terms.length;i++){
-        var p=lo.indexOf(terms[i]);
-        if(p>=0){
-          var a=Math.max(0,p-60), z=Math.min(fields[f].length,p+110);
-          return (a>0?'…':'')+fields[f].slice(a,z)+(z<fields[f].length?'…':'');
-        }
-      }
-    }
-    return (e.s||'').slice(0,160);
-  }
-  var runId=0;
-  function runSearch(){
-    if(!idxCache) return;
-    var my=++runId;
-    soMeta.textContent='Searching…';
-    ensureBodies().then(function(){ if(my===runId) renderSearch(); });
-  }
-  function renderSearch(){
-    var raw=soQ.value.trim(), phrase=raw.toLowerCase(), terms=toks(raw);
-    var pool=idxCache.entries.filter(inScope), hits;
-    if(!terms.length){ hits=pool.slice(); }
-    else{
-      var scored=[];
-      pool.forEach(function(e){ var sc=scoreOf(e,terms,phrase); if(sc>0) scored.push({e:e,sc:sc}); });
-      scored.sort(function(a,b){ return (b.e.d<a.e.d?-1:b.e.d>a.e.d?1:0) || (b.sc-a.sc); });
-      hits=scored.map(function(h){ return h.e; });
-    }
-    var days=0, seen={}, htm='', nd=newestDate();
-    hits.forEach(function(e){
-      if(!seen[e.d]){ seen[e.d]=1; days++;
-        htm+='<div class="so-datehead"><span>'+niceDate(e.d)+'</span>'+(e.d===nd?'<span class="tdy">● Today’s paper</span>':'')+'</div>';
-      }
-      htm+='<button class="so-hit" data-d="'+e.d+'" data-id="'+e.id+'">'
-        +'<span class="zt">'+(e.imp?'<span class="impdot">■ IMPORTANT · </span>':'')+e.z+'</span>'
-        +'<h4>'+mk(e.t,terms)+'</h4>'
-        +'<span class="sn">'+mk(snippet(e,terms),terms)+'</span></button>';
-    });
-    var scopeName = scopeDays==='all' ? 'all editions' : (scopeDays==='1' ? 'today' : 'last 30 days');
-    soMeta.textContent = hits.length
-      ? hits.length+(hits.length===1?' story':' stories')+' · '+days+(days===1?' day':' days')+' · scope: '+scopeName+(raw?'':' · latest first')
-      : '';
-    soBody.innerHTML = htm || '<div class="so-none">No stories match'+(raw?' “'+raw.replace(/</g,'&lt;')+'”':'')+' in '+scopeName+'.'
-      +(scopeDays!=='all'?'<br><br><b>Tip:</b> press ⚡ Go all in to search every edition ever printed.':'')+'</div>';
-    soBody.scrollTop=0;
-    soBody.querySelectorAll('.so-hit').forEach(function(h){
-      h.addEventListener('click', function(){
-        var id=h.getAttribute('data-id'), d=h.getAttribute('data-d');
-        if(document.getElementById(id)){ closeSearch(); openM(id); }
-        else location.href = ED+d+'.html#'+encodeURIComponent(id);
-      });
-    });
-  }
-
-  /* past editions sheet */
-  var archSheet = makeSheet('sheet-archive','<div class="bs-title">Past editions</div><div id="arch-list"><div class="so-none">Loading…</div></div>');
-  function openArchive(){
-    archSheet.classList.add('open');
-    loadIndex().then(function(x){
-      var nd=newestDate(), htm='';
-      x.editions.forEach(function(ed){
-        htm+='<button class="bs-row" data-d="'+ed.date+'"><span class="nm">'+niceDate(ed.date)+'</span>'
-          +'<span class="ct">'+ed.stories+' stories'+(ed.date===nd?' · today':'')+'</span></button>';
-      });
-      var box=archSheet.querySelector('#arch-list'); box.innerHTML=htm;
-      box.querySelectorAll('.bs-row').forEach(function(r){
-        r.addEventListener('click', function(){
-          var d=r.getAttribute('data-d');
-          if(d===nd){ archSheet.classList.remove('open'); window.scrollTo({top:0,behavior:'smooth'}); }
-          else location.href=ED+d+'.html';
-        });
-      });
-    }).catch(function(){
-      archSheet.querySelector('#arch-list').innerHTML='<div class="so-none">Could not load the archive list.</div>';
-    });
-  }
-
-  /* deep links: #modal-id opens the lesson on arrival */
-  (function(){
-    var h=decodeURIComponent(location.hash.slice(1)||'');
-    if(h && document.getElementById(h)) setTimeout(function(){ openM(h); }, 200);
-  })();
-
   /* ---- shell version stamp (visible in footer; carried forward verbatim daily) ---- */
-  var SHELL_VERSION = 'v1.2 (25/08/2026)';
+  var SHELL_VERSION = 'v1.1 (25/08/2026)';
   (function(){ var f=document.querySelector('footer');
     if(f){ var s=document.createElement('span'); s.textContent='shell '+SHELL_VERSION; f.appendChild(s); } })();
 
   applyTheme(); progress();
 })();
 </script>
+<script>(function(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;var m=document.getElementById(h);if(m){m.classList.add("open");document.body.style.overflow="hidden";m.scrollTop=0;}})();</script>
 </body>
 </html>
