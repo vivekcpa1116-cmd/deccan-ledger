@@ -1038,6 +1038,11 @@
   document.getElementById('mb-aa').addEventListener('click', function(){ rsSync(); rSheet.classList.add('open'); });
   document.getElementById('mb-search').addEventListener('click', function(){ document.getElementById('btn-search').click(); });
 
+  /* ---- shell version stamp (visible in footer; carried forward verbatim daily) ---- */
+  var SHELL_VERSION = 'v1.0 (25/08/2026)';
+  (function(){ var f=document.querySelector('footer');
+    if(f){ var s=document.createElement('span'); s.textContent='shell '+SHELL_VERSION; f.appendChild(s); } })();
+
   applyTheme(); progress();
 })();
 </script>
