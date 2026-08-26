@@ -1021,7 +1021,7 @@
     idxPromise = Promise.all([
       fetch(ED+'search-index.json',{cache:'no-cache'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }),
       fetch(ED+'index.json',{cache:'no-cache'}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
-    ]).then(function(a){ idxCache={entries:a[0].entries||[], editions:a[1].editions||[], months:a[0].months||[]}; return idxCache; });
+    ]).then(function(a){ idxCache={entries:a[0].entries||[], editions:a[1].editions||[], months:a[0].months||[], school:a[0].school||[]}; return idxCache; });
     return idxPromise;
   }
   function newestDate(){ return (idxCache && idxCache.editions.length) ? idxCache.editions[0].date : ''; }
@@ -1039,13 +1039,21 @@
   }
   function ensureBodies(){
     var need=monthsInScope().filter(function(mo){ return !bodies[mo]; });
-    return Promise.all(need.map(function(mo){
+    if(!bodies['school'] && !bodyReq['school'])
+      bodyReq['school']=fetch(ED+'search-school.json',{cache:'no-cache'})
+        .then(function(r){ return r.ok? r.json():{} }).catch(function(){ return {}; })
+        .then(function(j){ bodies['school']=j; });
+    if(bodyReq['school']) need=need.concat([]);
+    var waits=need.map(function(mo){
       if(!bodyReq[mo]) bodyReq[mo]=fetch(ED+'search-body-'+mo+'.json',{cache:'no-cache'})
         .then(function(r){ return r.ok? r.json():{} }).catch(function(){ return {}; })
         .then(function(j){ bodies[mo]=j; });
       return bodyReq[mo];
-    }));
+    });
+    if(bodyReq['school']) waits.push(bodyReq['school']);
+    return Promise.all(waits);
   }
+  function schoolBody(id){ return (bodies['school'] && bodies['school'][id]) || ''; }
   function bodyOf(e){ var m=bodies[e.d.slice(0,7)]; return (m && m[e.d+'|'+e.id]) || ''; }
   function niceDate(d){
     var dt=new Date(d+'T00:00:00');
@@ -1105,7 +1113,7 @@
       var w=terms[i], sc=0, wb=new RegExp('\\b'+escRe(w));
       if(new RegExp('\\b'+escRe(w)+'\\b').test(t)) sc=12; else if(wb.test(t)) sc=9; else if(t.indexOf(w)>=0) sc=7;
       else if(wb.test(sm)) sc=5; else if(sm.indexOf(w)>=0) sc=4;
-      else if(b.indexOf(w)>=0) sc=3; else if(z.indexOf(w)>=0) sc=2;
+      else if(b.indexOf(w)>=0){ sc=3; var nOcc=b.split(w).length-1; if(nOcc>1) sc+=Math.min(nOcc-1,6)*0.5; } else if(z.indexOf(w)>=0) sc=2;
       if(!sc) return 0;
       total+=sc;
     }
@@ -1115,6 +1123,38 @@
     }
     if(e.imp) total+=1.5;
     return total;
+  }
+  function scoreSchool(e, terms, phrase){
+    var t=e.t.toLowerCase(), sm=(e.s||'').toLowerCase(), b=schoolBody(e.id).toLowerCase(), z=('land school '+(e.cat||'')).toLowerCase();
+    var total=0;
+    for(var i=0;i<terms.length;i++){
+      var w=terms[i], sc=0, wb=new RegExp('\\b'+escRe(w));
+      if(new RegExp('\\b'+escRe(w)+'\\b').test(t)) sc=12; else if(wb.test(t)) sc=9; else if(t.indexOf(w)>=0) sc=7;
+      else if(wb.test(sm)) sc=5; else if(sm.indexOf(w)>=0) sc=4;
+      else if(b.indexOf(w)>=0){ sc=3; var nOcc=b.split(w).length-1; if(nOcc>1) sc+=Math.min(nOcc-1,6)*0.5; } else if(z.indexOf(w)>=0) sc=2;
+      if(!sc) return 0;
+      total+=sc;
+    }
+    if(phrase && terms.length>1){
+      if(t.indexOf(phrase)>=0) total+=20;
+      else if(sm.indexOf(phrase)>=0 || b.indexOf(phrase)>=0) total+=8;
+    }
+    return total;
+  }
+  function schoolSnippet(e, terms){
+    if(!terms.length) return (e.s||'').slice(0,160);
+    var fields=[e.s||'', schoolBody(e.id)];
+    for(var f=0; f<fields.length; f++){
+      var lo=fields[f].toLowerCase();
+      for(var i=0;i<terms.length;i++){
+        var pz=lo.indexOf(terms[i]);
+        if(pz>=0){
+          var a=Math.max(0,pz-60), zz=Math.min(fields[f].length,pz+110);
+          return (a>0?'…':'')+fields[f].slice(a,zz)+(zz<fields[f].length?'…':'');
+        }
+      }
+    }
+    return (e.s||'').slice(0,160);
   }
   function mk(text, terms){
     var out=text;
@@ -1164,17 +1204,38 @@
         +'<h4>'+mk(e.t,terms)+'</h4>'
         +'<span class="sn">'+mk(snippet(e,terms),terms)+'</span></button>';
     });
+    /* Land School: evergreen classes, every scope */
+    var sHits;
+    if(!terms.length){ sHits=(idxCache.school||[]).slice(); }
+    else{
+      var sScored=[];
+      (idxCache.school||[]).forEach(function(e){ var sc=scoreSchool(e,terms,phrase); if(sc>0) sScored.push({e:e,sc:sc}); });
+      sScored.sort(function(a,b){ return b.sc-a.sc; });
+      sHits=sScored.map(function(h){ return h.e; });
+    }
+    if(sHits.length){
+      htm+='<div class="so-datehead"><span>🎓 Land School — evergreen classes</span><span>'+sHits.length+' of 37</span></div>';
+      sHits.forEach(function(e){
+        htm+='<button class="so-hit" data-d="school" data-id="'+e.id+'">'
+          +'<span class="zt">Land School · '+(e.cat||'')+'</span>'
+          +'<h4>'+mk(e.t,terms)+'</h4>'
+          +'<span class="sn">'+mk(schoolSnippet(e,terms),terms)+'</span></button>';
+      });
+    }
     var scopeName = scopeDays==='all' ? 'all editions' : (scopeDays==='1' ? 'today' : 'last 30 days');
-    soMeta.textContent = hits.length
-      ? hits.length+(hits.length===1?' story':' stories')+' · '+days+(days===1?' day':' days')+' · scope: '+scopeName+(raw?'':' · latest first')
+    soMeta.textContent = (hits.length||sHits.length)
+      ? hits.length+(hits.length===1?' story':' stories')+' · '+days+(days===1?' day':' days')
+        +(sHits.length? ' · '+sHits.length+' school '+(sHits.length===1?'class':'classes'):'')
+        +' · scope: '+scopeName+(raw?'':' · latest first')
       : '';
-    soBody.innerHTML = htm || '<div class="so-none">No stories match'+(raw?' “'+raw.replace(/</g,'&lt;')+'”':'')+' in '+scopeName+'.'
+    soBody.innerHTML = htm || '<div class="so-none">Nothing matches'+(raw?' “'+raw.replace(/</g,'&lt;')+'”':'')+' in '+scopeName+' or the Land School.'
       +(scopeDays!=='all'?'<br><br><b>Tip:</b> press ⚡ Go all in to search every edition ever printed.':'')+'</div>';
     soBody.scrollTop=0;
     soBody.querySelectorAll('.so-hit').forEach(function(h){
       h.addEventListener('click', function(){
         var id=h.getAttribute('data-id'), d=h.getAttribute('data-d');
         if(document.getElementById(id)){ closeSearch(); openM(id); }
+        else if(d==='school') location.href = 'school.html#'+encodeURIComponent(id);
         else location.href = ED+d+'.html#'+encodeURIComponent(id);
       });
     });
@@ -1186,6 +1247,7 @@
     archSheet.classList.add('open');
     loadIndex().then(function(x){
       var nd=newestDate(), htm='';
+      htm+='<button class="bs-row" data-d="__school"><span class="nm">🎓 Land School — all 37 classes</span><span class="ct">evergreen</span></button>';
       x.editions.forEach(function(ed){
         htm+='<button class="bs-row" data-d="'+ed.date+'"><span class="nm">'+niceDate(ed.date)+'</span>'
           +'<span class="ct">'+ed.stories+' stories'+(ed.date===nd?' · today':'')+'</span></button>';
@@ -1194,7 +1256,8 @@
       box.querySelectorAll('.bs-row').forEach(function(r){
         r.addEventListener('click', function(){
           var d=r.getAttribute('data-d');
-          if(d===nd){ archSheet.classList.remove('open'); window.scrollTo({top:0,behavior:'smooth'}); }
+          if(d==='__school'){ location.href='school.html'; }
+          else if(d===nd){ archSheet.classList.remove('open'); window.scrollTo({top:0,behavior:'smooth'}); }
           else location.href=ED+d+'.html';
         });
       });
@@ -1210,7 +1273,7 @@
   })();
 
   /* ---- shell version stamp (visible in footer; carried forward verbatim daily) ---- */
-  var SHELL_VERSION = 'v1.2 (25/08/2026)';
+  var SHELL_VERSION = 'v1.3 (26/08/2026)';
   (function(){ var f=document.querySelector('footer');
     if(f){ var s=document.createElement('span'); s.textContent='shell '+SHELL_VERSION; f.appendChild(s); } })();
 

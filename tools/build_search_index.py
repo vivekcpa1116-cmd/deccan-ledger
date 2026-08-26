@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Rebuild the archive + search indexes from editions/*.html. Idempotent; run from repo root.
+"""Rebuild the archive + search indexes AND the Land School all-classes page. Idempotent; run from repo root.
 Outputs:
-  editions/index.json              — list of editions (date, day, stories)
-  editions/search-index.json       — light per-story metadata (title, summary, zone, id, date)
-  editions/search-body-YYYY-MM.json — full lesson text per story, sharded by month (lazy-loaded)
+  editions/index.json               — list of editions (date, day, stories)
+  editions/search-index.json        — light per-story metadata + light school-class metadata
+  editions/search-body-YYYY-MM.json — full lesson text per news story, sharded by month (lazy-loaded)
+  editions/search-school.json       — full text of all 37 Land School classes (lazy-loaded)
+  school.html                       — the Land School library: all 37 classes on one page (reuses index.html's <style>)
 """
 import re, json, glob, html as H, datetime, os
 from collections import defaultdict
@@ -12,6 +14,7 @@ def txt(s):
     s = re.sub(r'<[^>]+>', ' ', s)
     return re.sub(r'\s+', ' ', H.unescape(s)).strip()
 
+# ---------- news editions ----------
 editions, entries = [], []
 shards = defaultdict(dict)
 for path in sorted(glob.glob('editions/????-??-??.html')):
@@ -44,14 +47,78 @@ for path in sorted(glob.glob('editions/????-??-??.html')):
 editions.sort(key=lambda e: e['date'], reverse=True)
 entries.sort(key=lambda e: e['d'], reverse=True)
 months = sorted(shards.keys(), reverse=True)
+
+# ---------- Land School: light entries + full-text shard + library page ----------
+school_light, school_bodies = [], {}
+CAT_ORDER = ['Buying','Selling','Records','Rules','Tax','Safety','NRI','Developers','Market']
+lessons = []
+if os.path.exists('learn/lessons.json'):
+    data = json.load(open('learn/lessons.json'))
+    lessons = data['lessons'] if isinstance(data, dict) else data
+    for l in lessons:
+        school_light.append({'id': 'ls-'+l['id'], 't': l['title'], 's': l['summary'], 'cat': l['category']})
+        school_bodies['ls-'+l['id']] = txt(l['html'])
+
+    # school.html — reuse the live paper's <style> so design stays in sync
+    idx = open('index.html', encoding='utf-8').read()
+    style = re.search(r'<style>.*?</style>', idx, re.S).group(0)
+    fonts = re.search(r'<link rel="stylesheet" href="https://fonts[^>]+>', idx)
+    cats = defaultdict(list)
+    for l in lessons: cats[l['category']].append(l)
+    order = [c for c in CAT_ORDER if c in cats] + [c for c in sorted(cats) if c not in CAT_ORDER]
+    body_zones, modals = '', ''
+    for c in order:
+        cards = ''
+        for l in cats[c]:
+            lid = 'ls-'+l['id']
+            cards += ('<div class="card mini" data-deep="'+lid+'">\n'
+              '<h2>\U0001F393 '+l['title']+'</h2>\n'
+              '<div class="srcline">Land School · topic: '+l['category']+' · source &amp; further reading: <a href="'+l['srcUrl']+'" target="_blank" rel="noopener">1acre.in</a></div>\n'
+              '<div class="story">'+l['summary']+'</div>\n'
+              '<div class="deepbar"><span>Evergreen class — part of the 37-class course</span><button class="deep-btn" data-open="'+lid+'">Open class ▸</button></div>\n'
+              '</div>\n')
+            modals += ('<div class="overlay" id="'+lid+'">\n<div class="sheet">\n'
+              '<button class="close" data-close>Close ✕</button>\n'
+              '<h2>\U0001F393 '+l['title']+'</h2>\n'
+              '<div class="srcline">Land School — an original Deccan Ledger lesson · source &amp; further reading: <a href="'+l['srcUrl']+'" target="_blank" rel="noopener">'+l['srcTitle']+' — 1acre.in</a></div>\n'
+              +l['html']+'\n</div>\n</div>\n')
+        body_zones += ('<section class="zone">\n<div class="zone-head">'+c+
+          ' <span class="count">'+str(len(cats[c]))+(' class' if len(cats[c])==1 else ' classes')+'</span></div>\n'+cards+'</section>\n')
+
+    school_page = ('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
+      '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+      '<meta name="robots" content="noindex">\n<title>Land School — The Deccan Ledger</title>\n'
+      +(fonts.group(0)+'\n' if fonts else '')+style+'\n'
+      '<style>.schoolbar{position:sticky;top:0;z-index:120;background:#161512;color:#f6f3ec;font-family:Inter,-apple-system,sans-serif;font-size:14px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;}.schoolbar a{color:#e8c469;text-decoration:none;font-weight:600;white-space:nowrap;}.schoolhead{max-width:740px;margin:26px auto 6px;padding:0 18px;}.schoolhead h1{font-family:var(--serif);font-size:34px;margin:0 0 6px;}.schoolhead p{color:var(--muted);font-size:14.5px;line-height:1.55;margin:0 0 8px;}</style>\n'
+      '</head>\n<body>\n'
+      '<div class="schoolbar"><span>\U0001F393 Land School · all '+str(len(lessons))+' classes</span><a href="index.html">‹ Today’s paper</a></div>\n'
+      '<div class="schoolhead"><h1>Land School</h1><p>The complete 37-class course on land — written by The Deccan Ledger on the topics of 1acre.in’s research library, in our own words, every class crediting and linking its source. Two classes appear in the daily paper on rotation; this page holds them all. Tap any class to open it.</p></div>\n'
+      '<main class="wrap">\n'+body_zones+'</main>\n'+modals+
+      '<script>(function(){\n'
+      'function openM(id){var m=document.getElementById(id);if(!m)return;document.querySelectorAll(".overlay.open").forEach(function(o){o.classList.remove("open");});m.classList.add("open");document.body.style.overflow="hidden";m.scrollTop=0;}\n'
+      'function closeAll(){document.querySelectorAll(".overlay.open").forEach(function(m){m.classList.remove("open");});document.body.style.overflow="";}\n'
+      'document.querySelectorAll(".card[data-deep]").forEach(function(c){c.addEventListener("click",function(e){if(e.target.closest("a")||e.target.closest(".deep-btn"))return;openM(c.getAttribute("data-deep"));});});\n'
+      'document.querySelectorAll("[data-open]").forEach(function(b){b.addEventListener("click",function(e){e.stopPropagation();openM(b.getAttribute("data-open"));});});\n'
+      'document.querySelectorAll("[data-close]").forEach(function(b){b.addEventListener("click",closeAll);});\n'
+      'document.querySelectorAll(".overlay").forEach(function(o){o.addEventListener("click",function(e){if(e.target===o)closeAll();});});\n'
+      'document.addEventListener("keydown",function(e){if(e.key==="Escape")closeAll();});\n'
+      'try{var t=localStorage.getItem("ddl-theme");if(t&&t!=="system")document.documentElement.dataset.theme=t;}catch(e){}\n'
+      'var h=decodeURIComponent(location.hash.slice(1)||"");if(h)setTimeout(function(){openM(h);},100);\n'
+      '})();</script>\n</body>\n</html>\n')
+    open('school.html','w',encoding='utf-8').write(school_page)
+
+# ---------- write indexes ----------
 json.dump({'editions': editions}, open('editions/index.json','w'), ensure_ascii=False)
-json.dump({'v': 2, 'built': datetime.date.today().isoformat(), 'months': months, 'entries': entries},
+json.dump({'v': 3, 'built': datetime.date.today().isoformat(), 'months': months,
+           'entries': entries, 'school': school_light},
           open('editions/search-index.json','w'), ensure_ascii=False)
-# remove stale shards, write current ones
 for old in glob.glob('editions/search-body-*.json'):
     if os.path.basename(old)[12:-5] not in shards: os.remove(old)
 for mo, data in shards.items():
     json.dump(data, open(f'editions/search-body-{mo}.json','w'), ensure_ascii=False)
-print('editions:', len(editions), '| entries:', len(entries), '| months:', months,
-      '| light index:', os.path.getsize('editions/search-index.json'), 'bytes',
-      '| shards:', {mo: os.path.getsize(f'editions/search-body-{mo}.json') for mo in months})
+json.dump(school_bodies, open('editions/search-school.json','w'), ensure_ascii=False)
+print('editions:', len(editions), '| news entries:', len(entries), '| school classes:', len(school_light),
+      '| months:', months,
+      '| light index:', os.path.getsize('editions/search-index.json'), 'B',
+      '| school shard:', os.path.getsize('editions/search-school.json'), 'B',
+      '| school.html:', os.path.getsize('school.html') if lessons else 0, 'B')
