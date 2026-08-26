@@ -51,19 +51,25 @@ months = sorted(shards.keys(), reverse=True)
 # ---------- Land School: light entries + full-text shard + library page ----------
 school_light, school_bodies = [], {}
 CAT_ORDER = ['Buying','Selling','Records','Rules','Tax','Safety','NRI','Developers','Market']
-lessons, tg_guides, tg_tabs = [], [], []
+lessons, tg_guides, tg_tabs, masterclasses = [], [], [], []
+if os.path.exists('learn/masterclass.json'):
+    mdata = json.load(open('learn/masterclass.json'))
+    masterclasses = mdata['masterclasses']
+    for m in masterclasses:
+        school_light.append({'id': m['id'], 't': H.unescape(re.sub(r'<[^>]+>','',m['title'])), 's': H.unescape(m['summary']), 'cat': 'Masterclass'})
+        school_bodies[m['id']] = txt(m['html'])
 if os.path.exists('learn/tg-guides.json'):
     gdata = json.load(open('learn/tg-guides.json'))
     tg_guides = gdata['guides']
     tg_tabs = gdata.get('tabOrder', [])
     for g in tg_guides:
-        school_light.append({'id': g['id'], 't': g['title'], 's': g['summary'], 'cat': 'TG Guides · '+g['category']})
+        school_light.append({'id': g['id'], 't': H.unescape(re.sub(r'<[^>]+>','',g['title'])), 's': H.unescape(g['summary']), 'cat': 'TG Guides · '+g['category']})
         school_bodies[g['id']] = txt(g['html'])
 if os.path.exists('learn/lessons.json'):
     data = json.load(open('learn/lessons.json'))
     lessons = data['lessons'] if isinstance(data, dict) else data
     for l in lessons:
-        school_light.append({'id': 'ls-'+l['id'], 't': l['title'], 's': l['summary'], 'cat': l['category']})
+        school_light.append({'id': 'ls-'+l['id'], 't': H.unescape(re.sub(r'<[^>]+>','',l['title'])), 's': H.unescape(l['summary']), 'cat': l['category']})
         school_bodies['ls-'+l['id']] = txt(l['html'])
 
     # school.html — reuse the live paper's <style> so design stays in sync
@@ -91,6 +97,26 @@ if os.path.exists('learn/lessons.json'):
               +l['html']+'\n</div>\n</div>\n')
         body_zones += ('<section class="zone">\n<div class="zone-head">'+c+
           ' <span class="count">'+str(len(cats[c]))+(' class' if len(cats[c])==1 else ' classes')+'</span></div>\n'+cards+'</section>\n')
+
+    # --- Masterclasses (deep-research editions, flagship section at top) ---
+    mc_section, mc_modals = '', ''
+    if masterclasses:
+        mcards = ''
+        for m in masterclasses:
+            mcards += ('<div class="card imp" data-deep="'+m['id']+'">\n'
+              '<div class="tag">MASTERCLASS</div>\n'
+              '<h2>\U0001F3C6 '+m['title']+'</h2>\n'
+              '<div class="srcline">Deep-research edition · multi-source original research · all sources credited inside</div>\n'
+              '<div class="story">'+m['summary']+'</div>\n'
+              '<div class="deepbar"><span>The full deep-dive — budget 25–30 minutes</span><button class="deep-btn" data-open="'+m['id']+'">Open masterclass ▸</button></div>\n'
+              '</div>\n')
+            mc_modals += ('<div class="overlay" id="'+m['id']+'">\n<div class="sheet">\n'
+              '<button class="close" data-close>Close ✕</button>\n'
+              '<h2>\U0001F3C6 '+m['title']+'</h2>\n'
+              '<div class="srcline">Masterclass — a Deccan Ledger deep-research edition · sources credited at the end</div>\n'
+              +m['html']+'\n</div>\n</div>\n')
+        mc_section = ('<section class="zone">\n<div class="zone-head">\U0001F3C6 Masterclasses <span class="count">deep-research editions · '
+          +str(len(masterclasses))+(' so far' if len(masterclasses)>1 else ' so far')+'</span></div>\n'+mcards+'</section>\n')
 
     # --- Telangana land document guides section (tabbed) ---
     tg_section, tg_modals = '', ''
@@ -130,7 +156,7 @@ if os.path.exists('learn/lessons.json'):
       '</head>\n<body>\n'
       '<div class="schoolbar"><span>\U0001F393 Land School · all '+str(len(lessons))+' classes</span><a href="index.html">‹ Today’s paper</a></div>\n'
       '<div class="schoolhead"><h1>Land School</h1><p>The complete 37-class course on land — written by The Deccan Ledger on the topics of 1acre.in’s research library, in our own words, every class crediting and linking its source. Two classes appear in the daily paper on rotation; this page holds them all. Tap any class to open it.</p></div>\n'
-      '<main class="wrap">\n'+body_zones+tg_section+'</main>\n'+modals+tg_modals+
+      '<main class="wrap">\n'+mc_section+body_zones+tg_section+'</main>\n'+modals+tg_modals+mc_modals+
       '<script>(function(){\n'
       'function openM(id){var m=document.getElementById(id);if(!m)return;document.querySelectorAll(".overlay.open").forEach(function(o){o.classList.remove("open");});m.classList.add("open");document.body.style.overflow="hidden";m.scrollTop=0;}\n'
       'function closeAll(){document.querySelectorAll(".overlay.open").forEach(function(m){m.classList.remove("open");});document.body.style.overflow="";}\n'
