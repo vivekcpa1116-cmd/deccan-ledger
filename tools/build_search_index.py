@@ -51,7 +51,14 @@ months = sorted(shards.keys(), reverse=True)
 # ---------- Land School: light entries + full-text shard + library page ----------
 school_light, school_bodies = [], {}
 CAT_ORDER = ['Buying','Selling','Records','Rules','Tax','Safety','NRI','Developers','Market']
-lessons = []
+lessons, tg_guides, tg_tabs = [], [], []
+if os.path.exists('learn/tg-guides.json'):
+    gdata = json.load(open('learn/tg-guides.json'))
+    tg_guides = gdata['guides']
+    tg_tabs = gdata.get('tabOrder', [])
+    for g in tg_guides:
+        school_light.append({'id': g['id'], 't': g['title'], 's': g['summary'], 'cat': 'TG Guides · '+g['category']})
+        school_bodies[g['id']] = txt(g['html'])
 if os.path.exists('learn/lessons.json'):
     data = json.load(open('learn/lessons.json'))
     lessons = data['lessons'] if isinstance(data, dict) else data
@@ -85,6 +92,36 @@ if os.path.exists('learn/lessons.json'):
         body_zones += ('<section class="zone">\n<div class="zone-head">'+c+
           ' <span class="count">'+str(len(cats[c]))+(' class' if len(cats[c])==1 else ' classes')+'</span></div>\n'+cards+'</section>\n')
 
+    # --- Telangana land document guides section (tabbed) ---
+    tg_section, tg_modals = '', ''
+    if tg_guides:
+        gcats = defaultdict(list)
+        for g in tg_guides: gcats[g['category']].append(g)
+        tabs = [c for c in tg_tabs if c in gcats] + [c for c in sorted(gcats) if c not in tg_tabs]
+        chips = '<button class="chip active" data-tgtab="__all">All guides</button>'
+        for c in tabs:
+            chips += '<button class="chip" data-tgtab="'+c+'">'+c+' ('+str(len(gcats[c]))+')</button>'
+        tg_section = ('<div class="schoolhead" id="tg-guides" style="margin-top:44px;">'
+          '<h1 style="font-size:29px;">Telangana land document guides</h1>'
+          '<p>The complete set of '+str(len(tg_guides))+' Telangana-specific guides — every state document, portal and check, from the Pahani to the registration slot — written by The Deccan Ledger on 1acre.in\u2019s guide library, in our own words, each crediting and linking its source. Pick a tab to browse by stage.</p>'
+          '<div class="chips" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;">'+chips+'</div></div>\n')
+        for c in tabs:
+            cards = ''
+            for g in gcats[c]:
+                cards += ('<div class="card mini" data-deep="'+g['id']+'">\n'
+                  '<h2>\U0001F4D1 '+g['title']+'</h2>\n'
+                  '<div class="srcline">TG guide · '+g['category']+' · source &amp; further reading: <a href="'+g['srcUrl']+'" target="_blank" rel="noopener">1acre.in</a></div>\n'
+                  '<div class="story">'+g['summary']+'</div>\n'
+                  '<div class="deepbar"><span>Telangana land document guide</span><button class="deep-btn" data-open="'+g['id']+'">Open guide ▸</button></div>\n'
+                  '</div>\n')
+                tg_modals += ('<div class="overlay" id="'+g['id']+'">\n<div class="sheet">\n'
+                  '<button class="close" data-close>Close ✕</button>\n'
+                  '<h2>\U0001F4D1 '+g['title']+'</h2>\n'
+                  '<div class="srcline">Telangana land document guide — an original Deccan Ledger lesson · source &amp; further reading: <a href="'+g['srcUrl']+'" target="_blank" rel="noopener">'+g['srcTitle']+' — 1acre.in</a></div>\n'
+                  +g['html']+'\n</div>\n</div>\n')
+            tg_section += ('<section class="zone tgg" data-tgcat="'+c+'">\n<div class="zone-head">'+c+
+              ' <span class="count">'+str(len(gcats[c]))+(' guide' if len(gcats[c])==1 else ' guides')+'</span></div>\n'+cards+'</section>\n')
+
     school_page = ('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
       '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
       '<meta name="robots" content="noindex">\n<title>Land School — The Deccan Ledger</title>\n'
@@ -93,7 +130,7 @@ if os.path.exists('learn/lessons.json'):
       '</head>\n<body>\n'
       '<div class="schoolbar"><span>\U0001F393 Land School · all '+str(len(lessons))+' classes</span><a href="index.html">‹ Today’s paper</a></div>\n'
       '<div class="schoolhead"><h1>Land School</h1><p>The complete 37-class course on land — written by The Deccan Ledger on the topics of 1acre.in’s research library, in our own words, every class crediting and linking its source. Two classes appear in the daily paper on rotation; this page holds them all. Tap any class to open it.</p></div>\n'
-      '<main class="wrap">\n'+body_zones+'</main>\n'+modals+
+      '<main class="wrap">\n'+body_zones+tg_section+'</main>\n'+modals+tg_modals+
       '<script>(function(){\n'
       'function openM(id){var m=document.getElementById(id);if(!m)return;document.querySelectorAll(".overlay.open").forEach(function(o){o.classList.remove("open");});m.classList.add("open");document.body.style.overflow="hidden";m.scrollTop=0;}\n'
       'function closeAll(){document.querySelectorAll(".overlay.open").forEach(function(m){m.classList.remove("open");});document.body.style.overflow="";}\n'
@@ -103,6 +140,9 @@ if os.path.exists('learn/lessons.json'):
       'document.querySelectorAll(".overlay").forEach(function(o){o.addEventListener("click",function(e){if(e.target===o)closeAll();});});\n'
       'document.addEventListener("keydown",function(e){if(e.key==="Escape")closeAll();});\n'
       'try{var t=localStorage.getItem("ddl-theme");if(t&&t!=="system")document.documentElement.dataset.theme=t;}catch(e){}\n'
+      'var tgChips=document.querySelectorAll("[data-tgtab]");\n'
+      'function tgShow(tab){document.querySelectorAll("section.tgg").forEach(function(z){z.style.display=(tab==="__all"||z.getAttribute("data-tgcat")===tab)?"":"none";});tgChips.forEach(function(c){c.classList.toggle("active",c.getAttribute("data-tgtab")===tab);});}\n'
+      'tgChips.forEach(function(c){c.addEventListener("click",function(){tgShow(c.getAttribute("data-tgtab"));});});\n'
       'var h=decodeURIComponent(location.hash.slice(1)||"");if(h)setTimeout(function(){openM(h);},100);\n'
       '})();</script>\n</body>\n</html>\n')
     open('school.html','w',encoding='utf-8').write(school_page)

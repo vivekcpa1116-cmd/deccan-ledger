@@ -1214,7 +1214,7 @@
       sHits=sScored.map(function(h){ return h.e; });
     }
     if(sHits.length){
-      htm+='<div class="so-datehead"><span>🎓 Land School — evergreen classes</span><span>'+sHits.length+' of 37</span></div>';
+      htm+='<div class="so-datehead"><span>🎓 Land School — classes &amp; TG guides</span><span>'+sHits.length+' of '+(idxCache.school||[]).length+'</span></div>';
       sHits.forEach(function(e){
         htm+='<button class="so-hit" data-d="school" data-id="'+e.id+'">'
           +'<span class="zt">Land School · '+(e.cat||'')+'</span>'
@@ -1247,7 +1247,7 @@
     archSheet.classList.add('open');
     loadIndex().then(function(x){
       var nd=newestDate(), htm='';
-      htm+='<button class="bs-row" data-d="__school"><span class="nm">🎓 Land School — all 37 classes</span><span class="ct">evergreen</span></button>';
+      htm+='<button class="bs-row" data-d="__school"><span class="nm">🎓 Land School — classes &amp; TG guides</span><span class="ct">evergreen · 67</span></button>';
       x.editions.forEach(function(ed){
         htm+='<button class="bs-row" data-d="'+ed.date+'"><span class="nm">'+niceDate(ed.date)+'</span>'
           +'<span class="ct">'+ed.stories+' stories'+(ed.date===nd?' · today':'')+'</span></button>';
@@ -1273,7 +1273,7 @@
   })();
 
   /* ---- shell version stamp (visible in footer; carried forward verbatim daily) ---- */
-  var SHELL_VERSION = 'v1.3 (26/08/2026)';
+  var SHELL_VERSION = 'v1.4 (26/08/2026)';
   (function(){ var f=document.querySelector('footer');
     if(f){ var s=document.createElement('span'); s.textContent='shell '+SHELL_VERSION; f.appendChild(s); } })();
 
