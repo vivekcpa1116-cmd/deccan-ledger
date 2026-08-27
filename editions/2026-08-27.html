@@ -43,9 +43,7 @@
   header.masthead{border-bottom:1px solid var(--ink); padding:36px 0 16px; margin-bottom:6px;}
   .masthead h1{font-family:var(--serif); font-size:40px; font-weight:700; letter-spacing:.2px; line-height:1.05; text-wrap:balance;}
   .masthead h1 .tick{color:var(--accent);}
-  .masthead .sub{font-family:var(--sans); font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--muted); margin-top:10px;}
   .masthead .date{font-family:var(--sans); font-size:12.5px; color:var(--muted); margin-top:5px; font-variant-numeric:tabular-nums;}
-  .hint{font-family:var(--sans); font-size:12.5px; line-height:1.55; color:var(--muted); border:1px solid var(--line); background:var(--surface); border-radius:6px; padding:10px 14px; margin:16px 0 4px;}
   .hint b{color:var(--ink);}
 
   section.zone{margin-top:40px;}
@@ -302,12 +300,8 @@
 <div class="wrap">
 <header class="masthead">
   <h1>The Deccan Ledger<span class="tick">.</span></h1>
-  <div class="sub">Construction &middot; Real Estate &middot; Politics &mdash; Hyderabad &middot; Telangana &middot; Bengaluru</div>
   <div class="date">Thursday, 27 August 2026 &middot; 9:00 AM IST &middot; news published in the last 24 hours only</div>
-</header>
-
-<div class="hint">💡 <b>Every card is news from the last 24 hours</b> — publish time on each. Summaries up front; <b>press a card (or Go deep)</b> to open its full lesson: backstory, concepts from zero, and the make-me-a-pro story. Quiet sections say so honestly. Scroll to the bottom for the <b>Concept Library</b> — your growing textbook. <i>Sourcing note: direct article fetch was blocked across every publisher again today (an environment-level network policy, not a retry-able error), so every fact below is cross-checked across 2&ndash;3 independently reported outlets via search rather than read off one original page; single-sourced or timing-uncertain items are explicitly flagged in their source line.</i></div>
-<section class="zone">
+</header><section class="zone">
   <div class="zone-head">🔬 Vivek&rsquo;s Deep Dive of the Day <span class="count">one story, taken apart line by line</span></div>
   <div class="card imp" data-deep="dd-22a-land-crisis">
     <span class="tag">DEEP DIVE</span>
@@ -568,7 +562,7 @@
   </div>
 </section>
 
-<footer><span>Fresh every morning, 9:00 AM IST</span><span>Hard rule: last 24 hours only</span><span>Sunday: Weekly Digest</span></footer>
+<footer></footer>
 </div>
 
 <div class="overlay" id="dd-22a-land-crisis">
@@ -1500,13 +1494,14 @@ dharnas (same day)         white paper, resignation demand
   })();
 
   /* ---- shell version stamp (visible in footer; carried forward verbatim daily) ---- */
-  var SHELL_VERSION = 'v1.5 (27/08/2026)';
-  (function(){ var f=document.querySelector('footer');
-    if(f){ var s=document.createElement('span'); s.textContent='shell '+SHELL_VERSION; f.appendChild(s); } })();
+  var SHELL_VERSION = 'v1.6 (27/08/2026)';
+  /* version is not printed on the page (Vivek, 27/08) — it stays in this
+     variable and in the HTML comment below for deploy verification only. */
 
   applyTheme(); progress();
 })();
 </script>
+<!-- shell v1.6 (27/08/2026) -->
 <script>(function(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;var m=document.getElementById(h);if(m){m.classList.add("open");document.body.style.overflow="hidden";m.scrollTop=0;}})();</script>
 </body>
 </html>
