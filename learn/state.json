@@ -38,7 +38,7 @@
   "jda",
   "ulpin"
  ],
- "next": 4,
+ "next": 6,
  "cycle": 1,
  "note": "daily routine reads 2 ids at 'next', renders them, advances next by 2; when next >= 37 reshuffle to a NEW order (different from previous) and set next=0, cycle+=1"
 }
