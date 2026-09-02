@@ -292,6 +292,32 @@
   .so-hit mark{background:rgba(168,134,44,.3); color:inherit; border-radius:3px; padding:0 1px;}
   .so-none{padding:34px 16px; text-align:center; color:var(--muted); font-size:14.5px;}
   .bs-row .nm .arch-ic{opacity:.85; margin-right:4px;}
+
+  /* ==== LISTEN (shell v1.7) ==== */
+  .listen-btn{font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:.3px; color:var(--gold);
+    background:transparent; border:1px solid var(--gold); padding:6px 13px; border-radius:4px; cursor:pointer;
+    white-space:nowrap; margin-right:8px;}
+  .listen-btn:hover{background:var(--gold); color:var(--paper);}
+  .listen-btn.on{background:var(--gold); color:var(--paper);}
+  .sheet .listen-btn{margin:0 0 14px;}
+  .player{position:fixed; left:50%; transform:translateX(-50%); bottom:-120px; width:min(560px,94vw);
+    background:var(--ink); color:var(--paper); border-radius:14px; box-shadow:0 14px 40px rgba(0,0,0,.45);
+    padding:11px 14px; display:flex; align-items:center; gap:11px; z-index:300; transition:bottom .28s ease;
+    font-family:var(--sans);}
+  .player.up{bottom:calc(16px + env(safe-area-inset-bottom,0px));}
+  .player .pl-t{flex:1; min-width:0;}
+  .player .pl-now{font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .player .pl-sub{font-size:11.5px; opacity:.62; margin-top:1px;}
+  .player button{background:rgba(255,255,255,.12); color:var(--paper); border:none; width:36px; height:36px;
+    border-radius:50%; font-size:15px; cursor:pointer; flex:0 0 auto; display:flex; align-items:center; justify-content:center;}
+  .player button:hover{background:rgba(255,255,255,.24);}
+  .player .pl-bar{position:absolute; left:0; bottom:0; height:2px; background:var(--accent); width:0; border-radius:0 0 14px 14px; transition:width .3s linear;}
+  .rs-voice{width:100%; font:14px var(--sans); padding:9px 11px; border:1.5px solid var(--line); border-radius:9px;
+    background:var(--surface); color:var(--ink); margin-top:4px;}
+  .rs-speed{display:flex; gap:6px; margin-top:6px;}
+  .rs-speed button{flex:1; font:600 13px var(--sans); padding:8px 0; border-radius:8px; border:1.5px solid var(--line);
+    background:transparent; color:var(--muted); cursor:pointer;}
+  .rs-speed button.on{background:var(--ink); color:var(--paper); border-color:var(--ink);}
 </style>
 
 </head>
@@ -1036,7 +1062,11 @@ snub since 2023 ─────────────────────�
     +'<button class="sm" id="rs-minus">A−</button><button class="lg" id="rs-plus">A+</button></div>'
     +'<div class="rs-dots" id="rs-dots"></div></div>'
     +'<div class="rs-block"><div class="rs-label">Theme</div><div class="rs-theme">'
-    +'<button data-th="system">Auto</button><button data-th="light">Light</button><button data-th="dark">Dark</button></div></div>';
+    +'<button data-th="system">Auto</button><button data-th="light">Light</button><button data-th="dark">Dark</button></div></div>'
+    +'<div class="rs-block" id="rs-voicewrap"><div class="rs-label">Listening voice</div>'
+    +'<select class="rs-voice" id="rs-voice"></select>'
+    +'<div class="rs-speed" id="rs-speed"><button data-r="0.9">0.9×</button><button data-r="1">1×</button>'
+    +'<button data-r="1.2">1.2×</button><button data-r="1.5">1.5×</button></div></div>';
   var rSheet=makeSheet('sheet-reader', rsHtml);
   var dotsEl=rSheet.querySelector('#rs-dots');
   fsSteps.forEach(function(){ var d=document.createElement('span'); dotsEl.appendChild(d); });
@@ -1051,7 +1081,7 @@ snub since 2023 ─────────────────────�
   rSheet.querySelectorAll('.rs-theme button').forEach(function(b){
     b.addEventListener('click', function(){ curTheme=b.getAttribute('data-th'); applyTheme(); rsSync(); });
   });
-  document.getElementById('mb-aa').addEventListener('click', function(){ rsSync(); rSheet.classList.add('open'); });
+  document.getElementById('mb-aa').addEventListener('click', function(){ rsSync(); if(window.__ddlVoicesReady) window.__ddlVoicesReady(); rSheet.classList.add('open'); });
   document.getElementById('mb-search').addEventListener('click', function(){ document.getElementById('btn-search').click(); });
 
 
@@ -1314,15 +1344,248 @@ snub since 2023 ─────────────────────�
     if(h && document.getElementById(h)) setTimeout(function(){ openM(h); }, 200);
   })();
 
+
+  /* ---- LISTEN: read the paper aloud with the device's own voices (shell v1.7) ---- */
+  var TTS = (function(){
+    var synth = window.speechSynthesis;
+    if(!synth) return null;
+    var voices=[], voice=null, rate=1, queue=[], qi=0, chunks=[], ci=0, playing=false, keep=null, onDone=null;
+
+    /* rank the installed voices so the most natural one is the default */
+    function score(v){
+      var n=(v.name||'')+' '+(v.voiceURI||''), l=(v.lang||'').toLowerCase(), sc=0;
+      if(/natural|neural|enhanced|premium|siri/i.test(n)) sc+=60;
+      if(/google/i.test(n)) sc+=32;
+      if(/online/i.test(n)) sc+=18;
+      if(!v.localService) sc+=14;
+      if(/^en-in/.test(l)) sc+=22; else if(/^en-gb/.test(l)) sc+=12; else if(/^en-au/.test(l)) sc+=8; else if(/^en-us/.test(l)) sc+=10;
+      else if(/^en/.test(l)) sc+=4; else sc-=40;
+      if(/rishi|veena|samantha|ava|karen|aria|jenny|libby|sonia/i.test(n)) sc+=16;
+      if(/compact|eloquence|espeak/i.test(n)) sc-=25;
+      return sc;
+    }
+    function loadVoices(){
+      var all=synth.getVoices()||[];
+      voices=all.filter(function(v){ return /^en/i.test(v.lang||''); }).sort(function(a,b){ return score(b)-score(a); });
+      if(!voices.length) voices=all.slice();
+      var saved=null; try{ saved=localStorage.getItem('ddl-voice'); }catch(e){}
+      voice = (saved && voices.filter(function(v){ return v.voiceURI===saved; })[0]) || voices[0] || null;
+      try{ var r=parseFloat(localStorage.getItem('ddl-rate')); if(!isNaN(r)) rate=r; }catch(e){}
+    }
+    loadVoices();
+    if(typeof synth.onvoiceschanged !== 'undefined') synth.onvoiceschanged=function(){ loadVoices(); if(window.__ddlVoicesReady) window.__ddlVoicesReady(); };
+
+    /* long text breaks browser TTS — split into speakable chunks */
+    function split(t){
+      t=(t||'').replace(/\s+/g,' ').trim();
+      var parts=t.match(/[^.!?;:]+[.!?;:]*/g)||[t], out=[], cur='';
+      parts.forEach(function(p){
+        if((cur+p).length>220){ if(cur) out.push(cur.trim()); cur=p; } else cur+=p;
+      });
+      if(cur.trim()) out.push(cur.trim());
+      return out.filter(Boolean);
+    }
+    function speakChunk(){
+      if(ci>=chunks.length){ nextItem(); return; }
+      var u=new SpeechSynthesisUtterance(chunks[ci]);
+      if(voice) u.voice=voice;
+      u.rate=rate; u.pitch=1;
+      u.onend=function(){ ci++; if(playing) speakChunk(); };
+      u.onerror=function(){ ci++; if(playing) speakChunk(); };
+      synth.speak(u);
+      if(UI) UI.progress(qi, queue.length, ci, chunks.length);
+    }
+    function nextItem(){
+      qi++;
+      if(qi>=queue.length){ stop(); if(onDone) onDone(); return; }
+      startItem();
+    }
+    function startItem(){
+      chunks=split(queue[qi].text); ci=0;
+      if(UI) UI.now(queue[qi].title, (queue.length>1? (qi+1)+' of '+queue.length : ''));
+      setMedia(queue[qi].title);
+      speakChunk();
+    }
+    function setMedia(title){
+      if(!('mediaSession' in navigator)) return;
+      try{
+        navigator.mediaSession.metadata=new MediaMetadata({title:title, artist:'The Deccan Ledger'});
+        navigator.mediaSession.setActionHandler('pause', pause);
+        navigator.mediaSession.setActionHandler('play', resume);
+        navigator.mediaSession.setActionHandler('nexttrack', skip);
+      }catch(e){}
+    }
+    function play(items){
+      stop();
+      queue=items.filter(function(i){ return i && i.text && i.text.trim(); });
+      if(!queue.length) return;
+      qi=0; playing=true;
+      if(UI) UI.show();
+      startItem();
+      /* chrome stops speaking after ~15s without this nudge */
+      keep=setInterval(function(){ if(playing && !synth.paused){ synth.pause(); synth.resume(); } }, 9000);
+    }
+    function pause(){ if(playing){ synth.pause(); if(UI) UI.paused(true); } }
+    function resume(){ if(playing){ synth.resume(); if(UI) UI.paused(false); } }
+    function toggle(){ if(!playing) return; if(synth.paused) resume(); else pause(); }
+    function skip(){ if(!playing) return; synth.cancel(); nextItem(); }
+    function stop(){
+      playing=false; queue=[]; qi=0; chunks=[]; ci=0;
+      if(keep){ clearInterval(keep); keep=null; }
+      try{ synth.cancel(); }catch(e){}
+      if(UI) UI.hide();
+    }
+    var UI=null;
+    return {
+      play:play, stop:stop, toggle:toggle, skip:skip, pause:pause, resume:resume,
+      isPlaying:function(){ return playing; },
+      voices:function(){ if(!voices.length) loadVoices(); return voices; },
+      currentVoice:function(){ return voice; },
+      setVoice:function(uri){ var v=voices.filter(function(x){ return x.voiceURI===uri; })[0]; if(v){ voice=v; try{ localStorage.setItem('ddl-voice',uri); }catch(e){} } },
+      rate:function(){ return rate; },
+      setRate:function(r){ rate=r; try{ localStorage.setItem('ddl-rate',String(r)); }catch(e){} },
+      bindUI:function(u){ UI=u; }
+    };
+  })();
+
+  if(TTS){
+    /* ---------- floating player ---------- */
+    var pl=document.createElement('div'); pl.className='player';
+    pl.innerHTML='<button id="pl-toggle" aria-label="Pause">❚❚</button>'
+      +'<div class="pl-t"><div class="pl-now" id="pl-now"></div><div class="pl-sub" id="pl-sub"></div></div>'
+      +'<button id="pl-skip" aria-label="Next">▸▸</button><button id="pl-stop" aria-label="Stop">✕</button>'
+      +'<div class="pl-bar" id="pl-bar"></div>';
+    document.body.appendChild(pl);
+    TTS.bindUI({
+      show:function(){ pl.classList.add('up'); document.getElementById('pl-toggle').textContent='❚❚'; },
+      hide:function(){ pl.classList.remove('up'); document.querySelectorAll('.listen-btn.on').forEach(function(b){ b.classList.remove('on'); b.innerHTML=b.getAttribute('data-label')||'🎧 Listen'; }); },
+      now:function(t,sub){ document.getElementById('pl-now').textContent=t; document.getElementById('pl-sub').textContent=sub||''; },
+      paused:function(p){ document.getElementById('pl-toggle').textContent = p?'▶':'❚❚'; },
+      progress:function(i,n,c,cn){ var f=((i+(cn?c/cn:0))/Math.max(n,1))*100; document.getElementById('pl-bar').style.width=f+'%'; }
+    });
+    document.getElementById('pl-toggle').addEventListener('click', function(){ TTS.toggle(); });
+    document.getElementById('pl-skip').addEventListener('click', function(){ TTS.skip(); });
+    document.getElementById('pl-stop').addEventListener('click', function(){ TTS.stop(); });
+
+    /* ---------- what to read ---------- */
+    function clean(el){
+      if(!el) return '';
+      var c=el.cloneNode(true);
+      c.querySelectorAll('.srcline, .lessonnav, .star, .readmark, .deepbar, .close, .listen-btn, .tag').forEach(function(x){ x.remove(); });
+      return (c.innerText||c.textContent||'').replace(/\s+/g,' ').trim();
+    }
+    function cardText(card){
+      var h=card.querySelector('h2'), st=card.querySelector('.story'), wy=card.querySelector('.why');
+      return [h?h.innerText.replace(/✓\s*READ/i,''):'', st?st.innerText:'', wy?wy.innerText:''].join('. ').replace(/\s+/g,' ').trim();
+    }
+    function cardTitle(card){ var h=card.querySelector('h2'); return h? h.innerText.replace(/✓\s*READ/i,'').trim().slice(0,70) : 'Story'; }
+
+    function mark(btn, label){
+      document.querySelectorAll('.listen-btn.on').forEach(function(b){ b.classList.remove('on'); b.innerHTML=b.getAttribute('data-label')||'🎧 Listen'; });
+      if(btn){ btn.classList.add('on'); btn.innerHTML='■ Stop'; }
+    }
+
+    /* per-card listen buttons */
+    document.querySelectorAll('.card[data-deep]').forEach(function(card){
+      var bar=card.querySelector('.deepbar'); if(!bar) return;
+      var b=document.createElement('button'); b.className='listen-btn'; b.innerHTML='🎧 Listen';
+      b.setAttribute('data-label','🎧 Listen');
+      b.addEventListener('click', function(e){
+        e.stopPropagation();
+        if(b.classList.contains('on')){ TTS.stop(); return; }
+        TTS.play([{title:cardTitle(card), text:cardText(card)}]);
+        mark(b);
+      });
+      var btn=bar.querySelector('.deep-btn');
+      if(btn) bar.insertBefore(b, btn); else bar.appendChild(b);
+    });
+
+    /* listen button inside every lesson / deep dive */
+    document.querySelectorAll('.overlay .sheet').forEach(function(sheet){
+      var h=sheet.querySelector('h2'); if(!h) return;
+      var b=document.createElement('button'); b.className='listen-btn'; b.innerHTML='🎧 Listen to this';
+      b.setAttribute('data-label','🎧 Listen to this');
+      b.addEventListener('click', function(){
+        if(b.classList.contains('on')){ TTS.stop(); return; }
+        TTS.play([{title:h.innerText.trim().slice(0,70), text:clean(sheet)}]);
+        mark(b);
+      });
+      var after=sheet.querySelector('.srcline')||h;
+      after.parentNode.insertBefore(b, after.nextSibling);
+    });
+
+    /* listen to the whole paper (respects the section you are in) */
+    function paperQueue(){
+      var out=[];
+      document.querySelectorAll('section.zone').forEach(function(z){
+        if(z.style.display==='none') return;
+        z.querySelectorAll('.card[data-deep]').forEach(function(c){
+          if(c.style.display==='none') return;
+          out.push({title:cardTitle(c), text:cardText(c)});
+        });
+      });
+      return out;
+    }
+    var lp=document.createElement('button');
+    lp.className='icon-btn'; lp.id='btn-listen-all'; lp.title='Listen to the paper'; lp.setAttribute('aria-label','Listen to the paper');
+    lp.textContent='🎧';
+    lp.addEventListener('click', function(){
+      if(TTS.isPlaying()){ TTS.stop(); return; }
+      mark(null);
+      TTS.play(paperQueue());
+    });
+    var sb=document.getElementById('btn-search');
+    if(sb && sb.parentNode) sb.parentNode.insertBefore(lp, sb);
+
+    /* stop audio if the tab is closed */
+    window.addEventListener('beforeunload', function(){ try{ TTS.stop(); }catch(e){} });
+
+    /* ---------- voice + speed picker inside the Aa sheet ---------- */
+    (function(){
+      var wrap=document.getElementById('rs-voicewrap'),
+          sel=document.getElementById('rs-voice'),
+          spd=document.getElementById('rs-speed');
+      if(!wrap||!sel||!spd) return;
+      function fill(){
+        var vs=TTS.voices(), cur=TTS.currentVoice();
+        if(!vs.length){ wrap.style.display='none'; return; }
+        wrap.style.display='';
+        sel.innerHTML=vs.slice(0,12).map(function(v,i){
+          return '<option value="'+v.voiceURI+'"'+(cur&&cur.voiceURI===v.voiceURI?' selected':'')+'>'
+            +v.name+' ('+v.lang+')'+(i===0?' \u2014 best available':'')+'</option>';
+        }).join('');
+      }
+      window.__ddlVoicesReady=fill;
+      fill();
+      var tries=0, poll=setInterval(function(){
+        tries++;
+        if(TTS.voices().length){ fill(); clearInterval(poll); }
+        else if(tries>20) clearInterval(poll);
+      }, 300);
+      sel.addEventListener('change', function(){
+        TTS.setVoice(sel.value);
+        TTS.play([{title:'Voice sample', text:'This is how today\u2019s paper will sound while you are driving.'}]);
+      });
+      spd.querySelectorAll('button').forEach(function(b){
+        b.addEventListener('click', function(){
+          TTS.setRate(parseFloat(b.getAttribute('data-r')));
+          spd.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x===b); });
+        });
+      });
+      var r=TTS.rate();
+      spd.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', parseFloat(x.getAttribute('data-r'))===r); });
+    })();
+  }
+
   /* ---- shell version stamp (visible in footer; carried forward verbatim daily) ---- */
-  var SHELL_VERSION = 'v1.6 (27/08/2026)';
+  var SHELL_VERSION = 'v1.7 (02/09/2026)';
   /* version is not printed on the page (Vivek, 27/08) — it stays in this
      variable and in the HTML comment below for deploy verification only. */
 
   applyTheme(); progress();
 })();
 </script>
-<!-- shell v1.6 (27/08/2026) -->
+<!-- shell v1.7 (02/09/2026) -->
 
 </body>
 </html>
