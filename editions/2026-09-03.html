@@ -1541,10 +1541,33 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
       if(qi>=queue.length){ stop(); if(onDone) onDone(); return; }
       startItem();
     }
+    var au=null;
+    function audioEl(){
+      if(!au){
+        au=document.createElement('audio');
+        au.preload='none'; au.id='ddl-audio';
+        au.addEventListener('ended', function(){ if(playing) nextItem(); });
+        au.addEventListener('error', function(){ if(playing) nextItem(); });
+        au.addEventListener('timeupdate', function(){
+          if(UI && au.duration) UI.progress(qi, queue.length, au.currentTime, au.duration);
+        });
+        document.body.appendChild(au);
+      }
+      return au;
+    }
     function startItem(){
+      var item=queue[qi];
+      if(UI) UI.now(item.title, (queue.length>1? (qi+1)+' of '+queue.length : ''));
+      setMedia(item.title);
+      if(item.url){                       /* recorded studio voice */
+        try{ synth.cancel(); }catch(e){}
+        var a=audioEl();
+        a.src=item.url; a.playbackRate=rate;
+        a.play().catch(function(){ nextItem(); });
+        return;
+      }
+      if(au){ try{ au.pause(); }catch(e){} }
       chunks=split(queue[qi].text); ci=0;
-      if(UI) UI.now(queue[qi].title, (queue.length>1? (qi+1)+' of '+queue.length : ''));
-      setMedia(queue[qi].title);
       speakChunk();
     }
     function setMedia(title){
@@ -1566,14 +1589,15 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
       /* chrome stops speaking after ~15s without this nudge */
       keep=setInterval(function(){ if(playing && !synth.paused){ synth.pause(); synth.resume(); } }, 9000);
     }
-    function pause(){ if(playing){ synth.pause(); if(UI) UI.paused(true); } }
-    function resume(){ if(playing){ synth.resume(); if(UI) UI.paused(false); } }
-    function toggle(){ if(!playing) return; if(synth.paused) resume(); else pause(); }
-    function skip(){ if(!playing) return; synth.cancel(); nextItem(); }
+    function pause(){ if(playing){ if(au && !au.paused){ au.pause(); } else { synth.pause(); } if(UI) UI.paused(true); } }
+    function resume(){ if(playing){ if(au && au.src && au.paused){ au.play().catch(function(){}); } else { synth.resume(); } if(UI) UI.paused(false); } }
+    function toggle(){ if(!playing) return; var p = au && au.src ? au.paused : synth.paused; if(p) resume(); else pause(); }
+    function skip(){ if(!playing) return; try{ synth.cancel(); }catch(e){} if(au){ try{ au.pause(); }catch(e){} } nextItem(); }
     function stop(){
       playing=false; queue=[]; qi=0; chunks=[]; ci=0;
       if(keep){ clearInterval(keep); keep=null; }
       try{ synth.cancel(); }catch(e){}
+      if(au){ try{ au.pause(); au.removeAttribute('src'); }catch(e){} }
       if(UI) UI.hide();
     }
     var UI=null;
@@ -1584,7 +1608,7 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
       currentVoice:function(){ return voice; },
       setVoice:function(uri){ var v=voices.filter(function(x){ return x.voiceURI===uri; })[0]; if(v){ voice=v; try{ localStorage.setItem('ddl-voice',uri); }catch(e){} } },
       rate:function(){ return rate; },
-      setRate:function(r){ rate=r; try{ localStorage.setItem('ddl-rate',String(r)); }catch(e){} },
+      setRate:function(r){ rate=r; if(au) au.playbackRate=r; try{ localStorage.setItem('ddl-rate',String(r)); }catch(e){} },
       bindUI:function(u){ UI=u; }
     };
   })();
@@ -1607,6 +1631,36 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
     document.getElementById('pl-toggle').addEventListener('click', function(){ TTS.toggle(); });
     document.getElementById('pl-skip').addEventListener('click', function(){ TTS.skip(); });
     document.getElementById('pl-stop').addEventListener('click', function(){ TTS.stop(); });
+
+    /* ---------- today's recorded edition, if it exists ---------- */
+    var VOICED=null;
+    function urlFor(id){
+      if(!VOICED) return null;
+      var it=(VOICED.items||[]).filter(function(x){ return x.id===id; })[0];
+      return it ? VOICED.base+it.file : null;
+    }
+    function markVoiced(){
+      document.querySelectorAll('.card[data-deep]').forEach(function(c){
+        if(!urlFor(c.getAttribute('data-deep'))) return;
+        var b=c.querySelector('.listen-btn');
+        if(b){ b.innerHTML='🎧 Listen'; b.setAttribute('data-label','🎧 Listen'); b.title='Recorded voice'; }
+      });
+      var all=document.getElementById('btn-listen-all');
+      if(all) all.title='Listen to the paper (recorded voice)';
+    }
+    (function(){
+      var dateEl=document.querySelector('.masthead .date');
+      var label=dateEl? dateEl.textContent.split('&middot;')[0].split('·')[0].trim() : '';
+      fetch('audio/manifest.json',{cache:'no-cache'})
+        .then(function(r){ return r.ok? r.json():null; })
+        .then(function(m){
+          if(!m || !m.items || !m.items.length) return;
+          /* only use it for TODAY'S paper — never for an archived edition */
+          if(m.dateLabel && label && m.dateLabel.indexOf(label.slice(0,12))<0 && label.indexOf(m.dateLabel.slice(0,12))<0) return;
+          VOICED=m; markVoiced();
+        })
+        .catch(function(){});
+    })();
 
     /* ---------- what to read ---------- */
     function clean(el){
@@ -1634,7 +1688,7 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
       b.addEventListener('click', function(e){
         e.stopPropagation();
         if(b.classList.contains('on')){ TTS.stop(); return; }
-        TTS.play([{title:cardTitle(card), text:cardText(card)}]);
+        TTS.play([{title:cardTitle(card), text:cardText(card), url:urlFor(card.getAttribute('data-deep'))}]);
         mark(b);
       });
       var btn=bar.querySelector('.deep-btn');
@@ -1662,7 +1716,7 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
         if(z.style.display==='none') return;
         z.querySelectorAll('.card[data-deep]').forEach(function(c){
           if(c.style.display==='none') return;
-          out.push({title:cardTitle(c), text:cardText(c)});
+          out.push({title:cardTitle(c), text:cardText(c), url:urlFor(c.getAttribute('data-deep'))});
         });
       });
       return out;
@@ -1719,15 +1773,16 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
   }
 
   /* ---- shell version stamp (visible in footer; carried forward verbatim daily) ---- */
-  var SHELL_VERSION = 'v1.7 (02/09/2026)';
+  var SHELL_VERSION = 'v1.8 (03/09/2026)';
   /* version is not printed on the page (Vivek, 27/08) — it stays in this
      variable and in the HTML comment below for deploy verification only. */
 
   applyTheme(); progress();
 })();
 </script>
-<!-- shell v1.7 (02/09/2026) -->
+<!-- shell v1.8 (03/09/2026) -->
 
 <script>(function(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;var m=document.getElementById(h);if(m){m.classList.add("open");document.body.style.overflow="hidden";m.scrollTop=0;}})();</script>
+<!-- ddl-no-listen --><script>(function(){function go(){['.listen-btn','#btn-listen-all','.player','#rs-voicewrap'].forEach(function(sel){document.querySelectorAll(sel).forEach(function(el){ el.remove(); });});try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}}if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){setTimeout(go,60);}); else setTimeout(go,60);})();</script>
 </body>
 </html>
