@@ -12,12 +12,18 @@ Needs:  OPENAI_API_KEY  in the environment, and the gh CLI logged in.
 Usage:  python3 tools/make_audio.py            (voice: standard tts-1)
         python3 tools/make_audio.py --hd       (higher fidelity, 2x cost)
         python3 tools/make_audio.py --dry-run  (show cost, generate nothing)
+        python3 tools/make_audio.py --voice sage
+        python3 tools/make_audio.py --sample   (top story in onyx + sage, to choose by ear)
+        python3 tools/make_audio.py --sample --voices onyx,sage,ash
 """
 import os, re, sys, json, html, subprocess, tempfile, datetime, urllib.request
 
 REPO      = 'vivekcpa1116-cmd/deccan-ledger'
 GH        = '/Users/vivek/deccan-ledger-site/bin/gh'
-VOICE     = os.environ.get('DDL_VOICE', 'onyx')   # onyx = calm male news read
+VOICE     = os.environ.get('DDL_VOICE', 'onyx')   # onyx = deep, authoritative; sage = measured newsreader
+for _i, _a in enumerate(sys.argv):
+    if _a == '--voice' and _i + 1 < len(sys.argv):
+        VOICE = sys.argv[_i + 1]
 MODEL     = 'tts-1'
 RATE_USD  = 15.0 / 1_000_000                      # tts-1: $15 per 1M characters
 INR       = 88.0
@@ -80,7 +86,49 @@ def gh(*args, **kw):
     return subprocess.run([GH] + list(args), capture_output=True, text=True, **kw)
 
 
+def sample(voices):
+    """Read the paper's top story in each voice so the choice can be made by ear."""
+    key = os.environ.get('OPENAI_API_KEY')
+    if not key:
+        sys.exit('OPENAI_API_KEY is not set — cannot generate the samples.')
+    doc = open('index.html', encoding='utf-8').read()
+    items = collect(doc)
+    if not items:
+        sys.exit('no story cards found')
+    text = items[0]['text'][:900]
+    tmp = tempfile.mkdtemp(prefix='ddl-sample-')
+    files, chars = [], len(text) * len(voices)
+    for v in voices:
+        path = os.path.join(tmp, 'sample-%s.mp3' % v)
+        print('  recording', v, '…', flush=True)
+        globals()['VOICE'] = v
+        req = urllib.request.Request(
+            'https://api.openai.com/v1/audio/speech',
+            data=json.dumps({'model': MODEL, 'voice': v, 'input': text}).encode(),
+            headers={'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'})
+        with urllib.request.urlopen(req, timeout=180) as r, open(path, 'wb') as f:
+            f.write(r.read())
+        files.append(path)
+    tag = 'voice-samples'
+    gh('release', 'delete', tag, '--yes', '--cleanup-tag', '--repo', REPO)
+    gh('release', 'create', tag, '--repo', REPO, '--title', 'Voice samples',
+       '--notes', 'Same story, different voices. Delete once a voice is chosen.')
+    up = gh('release', 'upload', tag, *files, '--repo', REPO, '--clobber')
+    if up.returncode != 0:
+        sys.exit('upload failed: ' + (up.stderr or up.stdout))
+    print('\nTap to listen:')
+    for v in voices:
+        print('  %-6s https://github.com/%s/releases/download/%s/sample-%s.mp3' % (v, REPO, tag, v))
+    print('\ncost: about rupees %.0f' % (chars * RATE_USD * INR))
+
+
 def main():
+    if '--sample' in sys.argv:
+        vs = ['onyx', 'sage']
+        for i, a in enumerate(sys.argv):
+            if a == '--voices' and i + 1 < len(sys.argv):
+                vs = [x.strip() for x in sys.argv[i + 1].split(',') if x.strip()]
+        return sample(vs)
     doc = open('index.html', encoding='utf-8').read()
     dm = re.search(r'<div class="date">([^&<]+)', doc)
     date_label = dm.group(1).strip().rstrip('&middot;').strip() if dm else ''
