@@ -1206,6 +1206,7 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
     +'<button data-th="system">Auto</button><button data-th="light">Light</button><button data-th="dark">Dark</button></div></div>'
     +'<div class="rs-block" id="rs-voicewrap"><div class="rs-label">Listening voice</div>'
     +'<select class="rs-voice" id="rs-voice"></select>'
+    +'<div id="rs-voicetip" style="font-size:12.5px; line-height:1.5; color:var(--muted); margin-top:7px;"></div>'
     +'<div class="rs-speed" id="rs-speed"><button data-r="0.9">0.9×</button><button data-r="1">1×</button>'
     +'<button data-r="1.2">1.2×</button><button data-r="1.5">1.5×</button></div></div>';
   var rSheet=makeSheet('sheet-reader', rsHtml);
@@ -1495,11 +1496,11 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
     /* rank the installed voices so the most natural one is the default */
     function score(v){
       var n=(v.name||'')+' '+(v.voiceURI||''), l=(v.lang||'').toLowerCase(), sc=0;
-      if(/natural|neural|enhanced|premium|siri/i.test(n)) sc+=60;
-      if(/google/i.test(n)) sc+=32;
-      if(/online/i.test(n)) sc+=18;
-      if(!v.localService) sc+=14;
-      if(/^en-in/.test(l)) sc+=22; else if(/^en-gb/.test(l)) sc+=12; else if(/^en-au/.test(l)) sc+=8; else if(/^en-us/.test(l)) sc+=10;
+      if(/natural|neural|enhanced|premium|siri/i.test(n)) sc+=120;
+      if(/google/i.test(n)) sc+=45;
+      if(/online/i.test(n)) sc+=25;
+      if(!v.localService) sc+=20;
+      if(/^en-in/.test(l)) sc+=14; else if(/^en-gb/.test(l)) sc+=10; else if(/^en-au/.test(l)) sc+=7; else if(/^en-us/.test(l)) sc+=9;
       else if(/^en/.test(l)) sc+=4; else sc-=40;
       if(/rishi|veena|samantha|ava|karen|aria|jenny|libby|sonia/i.test(n)) sc+=16;
       if(/compact|eloquence|espeak/i.test(n)) sc-=25;
@@ -1745,10 +1746,28 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
         var vs=TTS.voices(), cur=TTS.currentVoice();
         if(!vs.length){ wrap.style.display='none'; return; }
         wrap.style.display='';
-        sel.innerHTML=vs.slice(0,12).map(function(v,i){
+        sel.innerHTML=vs.slice(0,14).map(function(v){
+          var n=v.name||'', tag='';
+          if(/natural|neural|enhanced|premium|siri/i.test(n)) tag=' \u2014 natural';
+          else if(/google/i.test(n) || !v.localService) tag=' \u2014 good';
+          else tag=' \u2014 basic';
           return '<option value="'+v.voiceURI+'"'+(cur&&cur.voiceURI===v.voiceURI?' selected':'')+'>'
-            +v.name+' ('+v.lang+')'+(i===0?' \u2014 best available':'')+'</option>';
+            +n+' ('+v.lang+')'+tag+'</option>';
         }).join('');
+        var best=vs[0]||{}, hasGood=/natural|neural|enhanced|premium|siri/i.test(best.name||'');
+        var tip=document.getElementById('rs-voicetip');
+        if(tip){
+          var ios=/iPhone|iPad|iPod/.test(navigator.userAgent||'');
+          tip.innerHTML = hasGood
+            ? 'A natural voice is selected. Try a few \u2014 each one sounds different.'
+            : (ios
+              ? '<b>These are your phone\u2019s basic voices.</b> For a far better one, free: '
+                + 'Settings \u2192 Accessibility \u2192 Spoken Content \u2192 Voices \u2192 English \u2014 '
+                + 'download any voice marked <i>Enhanced</i> or <i>Premium</i>, then come back and pick it here.'
+              : '<b>These are your phone\u2019s basic voices.</b> For a far better one, free: '
+                + 'Settings \u2192 Accessibility \u2192 Text-to-speech \u2192 install or update '
+                + '<i>Google Speech Services</i> and its English voices, then come back and pick it here.');
+        }
       }
       window.__ddlVoicesReady=fill;
       fill();
@@ -1773,14 +1792,14 @@ Sept auction calendar scheduled: Mokila+Bachupally (2 Sep) → Saroornagar (7 Se
   }
 
   /* ---- shell version stamp (visible in footer; carried forward verbatim daily) ---- */
-  var SHELL_VERSION = 'v1.8 (03/09/2026)';
+  var SHELL_VERSION = 'v1.9 (03/09/2026)';
   /* version is not printed on the page (Vivek, 27/08) — it stays in this
      variable and in the HTML comment below for deploy verification only. */
 
   applyTheme(); progress();
 })();
 </script>
-<!-- shell v1.8 (03/09/2026) -->
+<!-- shell v1.9 (03/09/2026) -->
 
 <script>(function(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;var m=document.getElementById(h);if(m){m.classList.add("open");document.body.style.overflow="hidden";m.scrollTop=0;}})();</script>
 <!-- ddl-no-listen --><script>(function(){function go(){['.listen-btn','#btn-listen-all','.player','#rs-voicewrap'].forEach(function(sel){document.querySelectorAll(sel).forEach(function(el){ el.remove(); });});try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}}if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){setTimeout(go,60);}); else setTimeout(go,60);})();</script>
