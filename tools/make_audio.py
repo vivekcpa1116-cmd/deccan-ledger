@@ -12,7 +12,8 @@ Needs:  OPENAI_API_KEY  in the environment, and the gh CLI logged in.
 Usage:  python3 tools/make_audio.py            (voice: standard tts-1)
         python3 tools/make_audio.py --hd       (higher fidelity, 2x cost)
         python3 tools/make_audio.py --dry-run  (show cost, generate nothing)
-        python3 tools/make_audio.py --voice sage
+        python3 tools/make_audio.py --voice sage   (force one voice)
+        (with no --voice and no DDL_VOICE it ALTERNATES: onyx one day, sage the next)
         python3 tools/make_audio.py --sample   (top story in onyx + sage, to choose by ear)
         python3 tools/make_audio.py --sample --voices onyx,sage,ash
 """
@@ -20,10 +21,20 @@ import os, re, sys, json, html, subprocess, tempfile, datetime, urllib.request
 
 REPO      = 'vivekcpa1116-cmd/deccan-ledger'
 GH        = '/Users/vivek/deccan-ledger-site/bin/gh'
-VOICE     = os.environ.get('DDL_VOICE', 'onyx')   # onyx = deep, authoritative; sage = measured newsreader
+# Voice: alternates day by day unless one is named.
+# Onyx = deep and authoritative. Sage = measured, newsreader-like.
+ALTERNATE = ['onyx', 'sage']
+VOICE_REASON = ''
+VOICE = os.environ.get('DDL_VOICE', '')
+if VOICE:
+    VOICE_REASON = 'set by DDL_VOICE'
 for _i, _a in enumerate(sys.argv):
     if _a == '--voice' and _i + 1 < len(sys.argv):
-        VOICE = sys.argv[_i + 1]
+        VOICE, VOICE_REASON = sys.argv[_i + 1], 'asked for'
+if not VOICE:
+    VOICE = ALTERNATE[datetime.date.today().toordinal() % len(ALTERNATE)]
+    _other = [v for v in ALTERNATE if v != VOICE]
+    VOICE_REASON = 'alternating daily — tomorrow is %s' % (_other[0] if _other else VOICE)
 MODEL     = 'tts-1'
 RATE_USD  = 15.0 / 1_000_000                      # tts-1: $15 per 1M characters
 INR       = 88.0
@@ -138,7 +149,8 @@ def main():
     chars = sum(len(i['text']) for i in items)
     usd = chars * RATE_USD
     print(f'{len(items)} tracks · {chars:,} characters · {MODEL} · '
-          f'${usd:.2f} (about rupees {usd*INR:.0f}) · voice {VOICE}')
+          f'${usd:.2f} (about rupees {usd*INR:.0f})')
+    print(f'voice: {VOICE}' + (f' ({VOICE_REASON})' if VOICE_REASON else ''))
     if DRY:
         for i in items:
             print(f"   {i['id']:26} {len(i['text']):>5} chars  {i['title'][:52]}")
@@ -151,7 +163,7 @@ def main():
     tag = 'audio-' + today
     tmp = tempfile.mkdtemp(prefix='ddl-audio-')
     manifest = {'date': today, 'dateLabel': date_label, 'model': MODEL,
-                'voice': VOICE, 'items': []}
+                'voice': VOICE, 'voiceNote': VOICE_REASON, 'items': []}
 
     for n, it in enumerate(items, 1):
         fn = f"{it['id']}.mp3"

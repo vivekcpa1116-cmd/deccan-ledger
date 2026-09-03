@@ -2,8 +2,8 @@
 # Spoken edition — run this yourself so your API key never leaves your machine.
 #
 #   export OPENAI_API_KEY='sk-...'        # once per terminal session
-#   ./tools/publish_audio.sh              # today's paper in the default voice
-#   ./tools/publish_audio.sh sage         # ...or in a named voice
+#   ./tools/publish_audio.sh              # today's paper — voice alternates daily (onyx, sage, onyx…)
+#   ./tools/publish_audio.sh sage         # ...or force a named voice
 #   ./tools/publish_audio.sh --sample     # top story in onyx AND sage, to compare
 #
 set -e
@@ -22,9 +22,15 @@ if [ "$1" = "--sample" ]; then
   exit 0
 fi
 
-VOICE="${1:-onyx}"
-echo "Generating today's spoken edition in '$VOICE' …"
-python3 tools/make_audio.py --voice "$VOICE"
+if [ -n "$1" ]; then
+  VOICE="$1"
+  echo "Generating today's spoken edition in '$VOICE' …"
+  python3 tools/make_audio.py --voice "$VOICE"
+else
+  VOICE="today's voice"
+  echo "Generating today's spoken edition (voices alternate daily: onyx, then sage) …"
+  python3 tools/make_audio.py
+fi
 
 git add audio/manifest.json
 git commit -q -m "Spoken edition ($VOICE)" || { echo "nothing new to commit"; exit 0; }
